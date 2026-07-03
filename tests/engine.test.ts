@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, canNirvana, nirvana, reenter } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -107,5 +107,50 @@ describe("events", () => {
       expect(ms).toBeGreaterThanOrEqual(60_000);
       expect(ms).toBeLessThanOrEqual(180_000);
     }
+  });
+});
+
+describe("prestige", () => {
+  it("locked until threshold; first prestige gives exactly 1 barami", () => {
+    const s = newGame(0);
+    expect(canPrestige(s)).toBe(false);
+    s.totalBoon = 1e8;
+    expect(canPrestige(s)).toBe(true);
+    expect(baramiGain(s)).toBe(1);
+    s.totalBoon = 1e10;
+    expect(baramiGain(s)).toBe(10);
+  });
+  it("prestige resets run but keeps barami/achievements/allTime", () => {
+    const s = newGame(0);
+    s.totalBoon = 1e8; s.allTimeBoon = 1e8; s.boon = 5; s.producers[0] = 3;
+    s.upgrades.push("a-ring"); s.clickTier = 2; s.achievements.push("first-click");
+    prestige(s, 0);
+    expect(s.barami).toBe(1); expect(s.lives).toBe(2);
+    expect(s.boon).toBe(0); expect(s.producers[0]).toBe(0);
+    expect(s.upgrades).toEqual([]); expect(s.clickTier).toBe(0);
+    expect(s.allTimeBoon).toBe(1e8); expect(s.achievements).toContain("first-click");
+  });
+  it("barami boosts production", () => {
+    const s = newGame(0); s.producers[0] = 10;
+    const before = boonPerSecond(s, 0);
+    s.barami = 20; // +100% at 0.05/point
+    expect(boonPerSecond(s, 0)).toBeCloseTo(before * 2);
+  });
+  it("rebirth ladder and nirvana gate", () => {
+    const s = newGame(0);
+    expect(rebirthTier(s).name).toBe("หมาวัด");
+    s.barami = 250;
+    expect(rebirthTier(s).name).toBe("เทวดา");
+    s.barami = 2500;
+    expect(rebirthTier(s).name).toBe("พรหม");
+    expect(canNirvana(s)).toBe(false);
+    s.barami = 10_000;
+    expect(canNirvana(s)).toBe(true);
+    nirvana(s);
+    expect(s.completed).toBe(true);
+    expect(s.barami).toBe(10_000); // nothing destroyed
+    reenter(s);
+    expect(s.completed).toBe(false);
+    expect(s.barami).toBe(10_000);
   });
 });

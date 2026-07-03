@@ -1,4 +1,4 @@
-import { PRODUCERS, CLICK_TIERS, UPGRADES, TUNING, EVENTS } from "./data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, TUNING, EVENTS, REBIRTH_TIERS } from "./data";
 
 export interface ActiveBuff { eventId: string; endsAt: number } // epoch ms
 export interface GameState {
@@ -129,3 +129,31 @@ export function nextEventDelayMs(rand: () => number = Math.random): number {
   const { eventMinGapSec: a, eventMaxGapSec: b } = TUNING;
   return (a + rand() * (b - a)) * 1000;
 }
+
+export const canPrestige = (s: GameState) => s.totalBoon >= TUNING.prestigeUnlockBoon;
+export const baramiGain = (s: GameState) =>
+  Math.floor(Math.sqrt(s.totalBoon / TUNING.prestigeUnlockBoon));
+
+function resetRun(s: GameState): void {
+  s.boon = 0; s.totalBoon = 0;
+  s.producers = PRODUCERS.map(() => 0);
+  s.upgrades = []; s.clickTier = 0; s.buffs = [];
+}
+
+export function prestige(s: GameState, now = Date.now()): void {
+  if (!canPrestige(s)) return;
+  s.barami += baramiGain(s); s.lives++; s.lastSeen = now;
+  resetRun(s);
+}
+
+export function rebirthTier(s: GameState) {
+  let tier = REBIRTH_TIERS[0]!;
+  for (const t of REBIRTH_TIERS) if (s.barami >= t.baramiFloor) tier = t;
+  return tier;
+}
+
+export const canNirvana = (s: GameState) =>
+  rebirthTier(s) === REBIRTH_TIERS[REBIRTH_TIERS.length - 1] && s.barami >= TUNING.nirvanaBarami;
+
+export function nirvana(s: GameState): void { if (canNirvana(s)) s.completed = true; }
+export function reenter(s: GameState): void { s.completed = false; resetRun(s); }
