@@ -230,6 +230,8 @@ function renderBalance(s: GameState, now: number): void {
   boonDisplay.textContent = formatBoon(s.boon);
   bpsDisplay.textContent = `+${formatBoon(boonPerSecond(s, now))} บุญ/วิ`;
   rebirthBadge.textContent = `ภพ: ${rebirthTier(s).name}`;
+  const serial = `ชาติที่ ${s.lives}`;
+  if (balanceCard.dataset.serial !== serial) balanceCard.dataset.serial = serial;
 }
 
 // ---- render: click tier ----

@@ -65,12 +65,19 @@ button {
   position: relative;
   flex-shrink: 0;
   background:
+    /* guilloche corner rosettes, banknote-style */
+    repeating-radial-gradient(circle at -2% -8%, transparent 0 5px, rgba(140, 90, 43, 0.07) 5px 6px) 0 0 / 220px 220px no-repeat,
+    repeating-radial-gradient(circle at 102% 108%, transparent 0 5px, rgba(140, 90, 43, 0.07) 5px 6px) 100% 100% / 220px 220px no-repeat,
     linear-gradient(160deg, #fffdf7 0%, #fbf1da 55%, #f3e2bd 100%);
   border-bottom: 3px solid var(--accent);
   border-radius: 0 0 1.5rem 1.5rem;
   padding: 1.25rem 1rem 1rem;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(110, 74, 28, 0.16);
+  box-shadow:
+    inset 0 0 0 1px rgba(140, 90, 43, 0.28),
+    inset 0 0 0 4px rgba(255, 253, 247, 0.9),
+    inset 0 0 0 5px rgba(140, 90, 43, 0.18),
+    0 4px 16px rgba(110, 74, 28, 0.16);
 }
 .balance-card::before {
   content: "บุญWallet";
@@ -80,6 +87,16 @@ button {
   font-family: var(--font-display);
   font-size: 0.78rem;
   color: var(--accent-2);
+}
+/* banknote serial number — ชาติที่ N, red like Thai note serials */
+.balance-card::after {
+  content: attr(data-serial);
+  position: absolute;
+  top: 0.6rem;
+  right: 3.4rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--danger);
 }
 .balance-label {
   font-size: 0.8rem;
@@ -204,7 +221,31 @@ button {
   gap: 0.75rem;
   position: relative;
   padding: 1rem;
+  overflow: hidden;
 }
+/* radiating aura rays behind the coin — likay-backdrop energy */
+.click-area::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(150vw, 720px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: repeating-conic-gradient(
+    rgba(244, 185, 66, 0.16) 0deg 9deg,
+    transparent 9deg 24deg
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 20%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 20%, transparent 68%);
+  animation: aura-spin 48s linear infinite;
+  pointer-events: none;
+}
+@keyframes aura-spin {
+  to { rotate: 360deg; }
+}
+.clickable { position: relative; z-index: 1; }
+.float-layer { z-index: 2; }
 
 .clickable {
   width: min(55vw, 220px);
@@ -265,8 +306,9 @@ button {
 .float-plus {
   position: absolute;
   top: 40%;
-  font-weight: 700;
-  color: var(--accent);
+  font-family: var(--font-display);
+  color: var(--gold-deep);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.9);
   animation: float-up 1s ease-out forwards;
 }
 
@@ -470,10 +512,12 @@ button.upgrade-row:not(.unaffordable):active {
 /* ---- confirm dialog ---- */
 
 #confirm-dialog {
-  border: none;
+  border: 2px solid var(--accent);
+  outline: 4px solid rgba(244, 185, 66, 0.25);
   border-radius: 1rem;
   padding: 1.25rem;
   max-width: min(90vw, 360px);
+  background: linear-gradient(160deg, #fffdf7, #faf0d9);
 }
 #confirm-dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);
@@ -744,7 +788,8 @@ button.upgrade-row:not(.unaffordable):active {
   .float-plus,
   .shake,
   .event-claim,
-  .clickable {
+  .clickable,
+  .click-area::before {
     animation: none !important;
   }
   .clickable:active {
