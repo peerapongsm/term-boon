@@ -4,24 +4,31 @@
    declared after a media query would otherwise win by source order. */
 
 :root {
-  --bg: #f4efe6;
-  --surface: #ffffff;
-  --surface-2: #efe6d8;
+  --bg: #f0e8d8;
+  --surface: #fffdf7;
+  --surface-2: #efe4cf;
   --fg: #2a2117;
   --fg-muted: #7a6e5c;
   --accent: #b8862c;
   --accent-2: #8c5a2b;
+  --gold-deep: #6e4a1c;
   --danger: #a13a2f;
   --nirvana: #6a4fa3;
   --ok: #3f7d4f;
+  --line: #3b2a1a;
+  --font-display: "Chonburi", "IBM Plex Sans Thai", serif;
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   margin: 0;
-  font-family: "Noto Sans Thai", system-ui, sans-serif;
-  background: var(--bg);
+  font-family: "IBM Plex Sans Thai", "Noto Sans Thai", system-ui, sans-serif;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(244, 185, 66, 0.22), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(184, 134, 44, 0.05) 0 2px, transparent 2px 14px),
+    repeating-linear-gradient(-45deg, rgba(184, 134, 44, 0.05) 0 2px, transparent 2px 14px),
+    var(--bg);
   color: var(--fg);
 }
 
@@ -57,24 +64,38 @@ button {
 .balance-card {
   position: relative;
   flex-shrink: 0;
-  background: var(--surface);
+  background:
+    linear-gradient(160deg, #fffdf7 0%, #fbf1da 55%, #f3e2bd 100%);
+  border-bottom: 3px solid var(--accent);
   border-radius: 0 0 1.5rem 1.5rem;
   padding: 1.25rem 1rem 1rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(110, 74, 28, 0.16);
+}
+.balance-card::before {
+  content: "บุญWallet";
+  position: absolute;
+  top: 0.6rem;
+  left: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--accent-2);
 }
 .balance-label {
   font-size: 0.8rem;
   color: var(--fg-muted);
 }
 .balance-amount {
-  font-size: clamp(2rem, 9vw, 3rem);
-  font-weight: 700;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 8.5vw, 2.8rem);
+  line-height: 1.25;
+  color: var(--gold-deep);
   cursor: pointer;
 }
 .balance-rate {
   font-size: 0.85rem;
+  font-weight: 600;
   color: var(--ok);
 }
 .rebirth-badge {
@@ -82,7 +103,10 @@ button {
   margin-top: 0.5rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  background: var(--surface-2);
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  color: var(--accent-2);
+  font-weight: 600;
   font-size: 0.8rem;
 }
 .icon-btn {
@@ -187,31 +211,49 @@ button {
   height: min(55vw, 220px);
   min-width: 200px;
   min-height: 200px;
-  border: none;
+  border: 3px solid var(--gold-deep);
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, var(--accent), var(--accent-2));
-  color: #fff;
+  background:
+    radial-gradient(circle at 35% 28%, #fff2cf 0%, #f2ce7e 34%, var(--accent) 68%, var(--accent-2) 100%);
+  color: var(--gold-deep);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  box-shadow:
+    0 0 0 6px rgba(244, 185, 66, 0.28),
+    0 10px 26px rgba(110, 74, 28, 0.32),
+    inset 0 -8px 18px rgba(110, 74, 28, 0.28),
+    inset 0 6px 14px rgba(255, 250, 235, 0.7);
   touch-action: manipulation;
   user-select: none;
+  animation: coin-breathe 3.2s ease-in-out infinite;
 }
 .clickable:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
+  box-shadow:
+    0 0 0 6px rgba(244, 185, 66, 0.4),
+    0 4px 12px rgba(110, 74, 28, 0.3),
+    inset 0 -4px 10px rgba(110, 74, 28, 0.3),
+    inset 0 4px 10px rgba(255, 250, 235, 0.6);
+}
+@keyframes coin-breathe {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(244, 185, 66, 0.28), 0 10px 26px rgba(110, 74, 28, 0.32), inset 0 -8px 18px rgba(110, 74, 28, 0.28), inset 0 6px 14px rgba(255, 250, 235, 0.7); }
+  50% { box-shadow: 0 0 0 12px rgba(244, 185, 66, 0.14), 0 10px 26px rgba(110, 74, 28, 0.32), inset 0 -8px 18px rgba(110, 74, 28, 0.28), inset 0 6px 14px rgba(255, 250, 235, 0.7); }
 }
 .click-art {
   font-size: 3rem;
   line-height: 1;
 }
 .click-tier-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.2rem 0.85rem;
   text-align: center;
+  background: rgba(255, 250, 235, 0.85);
+  border-radius: 999px;
+  color: var(--accent-2);
 }
 
 .float-layer {
@@ -237,28 +279,33 @@ button {
 .tab-bar {
   flex-shrink: 0;
   display: flex;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
   background: var(--surface);
-  border-top: 1px solid var(--surface-2);
+  border-top: 2px solid var(--surface-2);
 }
 .tab {
   flex: 1;
   border: none;
+  border-radius: 999px;
   background: transparent;
-  padding: 0.75rem 0.5rem;
+  padding: 0.55rem 0.5rem;
   font-size: 0.85rem;
+  font-weight: 600;
   color: var(--fg-muted);
 }
 .tab.active {
-  color: var(--accent-2);
+  color: #fff;
   font-weight: 700;
-  border-top: 2px solid var(--accent);
+  background: linear-gradient(160deg, var(--accent), var(--accent-2));
+  box-shadow: inset 0 1px 3px rgba(255, 250, 235, 0.4), 0 2px 6px rgba(110, 74, 28, 0.3);
 }
 
 .panel {
   flex-shrink: 0;
   max-height: 45dvh;
   overflow-y: auto;
-  background: var(--surface);
+  background: var(--surface-2);
   padding: 0.75rem;
 }
 
@@ -269,13 +316,20 @@ button {
   gap: 0.1rem 0.75rem;
   width: 100%;
   text-align: left;
-  border: none;
+  border: 2px solid rgba(59, 42, 26, 0.14);
   border-radius: 1rem;
-  background: var(--surface-2);
+  background: var(--surface);
+  box-shadow: 0 2px 0 rgba(59, 42, 26, 0.12);
   padding: 0.6rem 0.85rem;
   margin-bottom: 0.5rem;
+  transition: transform 0.08s ease;
 }
-.service-name, .upgrade-name { font-weight: 600; grid-column: 1; }
+button.service-row:not(.unaffordable):active,
+button.upgrade-row:not(.unaffordable):active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(59, 42, 26, 0.12);
+}
+.service-name, .upgrade-name { font-weight: 600; grid-column: 1; text-wrap: pretty; }
 .service-flavor, .upgrade-flavor { grid-column: 1 / -1; font-size: 0.75rem; color: var(--fg-muted); }
 .service-owned { grid-column: 2; align-self: start; }
 .service-cost, .upgrade-cost { grid-column: 2; align-self: start; font-weight: 600; }
@@ -353,7 +407,8 @@ button {
 .achievement-item {
   border-radius: 0.75rem;
   padding: 0.5rem 0.6rem;
-  background: var(--surface-2);
+  background: var(--surface);
+  border: 2px solid rgba(59, 42, 26, 0.14);
 }
 .achievement-item.locked { opacity: 0.45; }
 .achievement-name { display: block; font-weight: 700; font-size: 0.8rem; }
@@ -644,9 +699,8 @@ button {
     font-size: 0.95rem;
   }
   .tab.active {
-    border-top: none;
-    border-left: 3px solid var(--accent);
-    background: var(--surface-2);
+    border-radius: 0 999px 999px 0;
+    box-shadow: 0 2px 6px rgba(110, 74, 28, 0.3);
   }
 
   /* main: balance header + big click area */
@@ -670,6 +724,10 @@ button {
   .click-art {
     font-size: 4rem;
   }
+  .pix-click {
+    width: 160px;
+    height: 160px;
+  }
 
   /* aside: services/upgrades/profile panel, always visible (JS still drives which one is active) */
   .panel {
@@ -685,7 +743,8 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .float-plus,
   .shake,
-  .event-claim {
+  .event-claim,
+  .clickable {
     animation: none !important;
   }
   .clickable:active {
