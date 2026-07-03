@@ -88,6 +88,7 @@ export function buyProducer(s: GameState, i: number): boolean {
 
 export function buyClickTier(s: GameState, tier: number): boolean {
   if (tier !== s.clickTier + 1) return false;
+  if (tier >= CLICK_TIERS.length) return false;
   const cost = clickTierCost(tier);
   if (s.boon < cost) return false;
   s.boon -= cost; s.clickTier = tier;

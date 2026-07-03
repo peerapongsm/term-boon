@@ -37,4 +37,11 @@ describe("core engine", () => {
     expect(buyClickTier(s, 1)).toBe(true);
     expect(boonPerClick(s, 0)).toBe(10);
   });
+  it("refuses to buy past the max tier", () => {
+    const s = newGame(0);
+    s.clickTier = 4;
+    s.boon = 1e15;
+    expect(buyClickTier(s, 5)).toBe(false);
+    expect(s.clickTier).toBe(4);
+  });
 });
