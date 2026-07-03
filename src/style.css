@@ -577,6 +577,77 @@ button {
   }
 }
 
+/* ---- desktop portal layout (web-banking-portal parody) ---- */
+
+@media (min-width: 1024px) {
+  .wallet {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr) 340px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "sidebar header aside"
+      "sidebar banner aside"
+      "sidebar click  aside";
+    max-width: 1200px;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* sidebar: tab-bar re-laid-out as a vertical portal nav, no DOM change */
+  .tab-bar {
+    grid-area: sidebar;
+    flex-direction: column;
+    align-items: stretch;
+    border-top: none;
+    border-right: 1px solid var(--surface-2);
+    padding: 1rem 0;
+    gap: 0.25rem;
+  }
+  .tab {
+    flex: none;
+    text-align: left;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  .tab.active {
+    border-top: none;
+    border-left: 3px solid var(--accent);
+    background: var(--surface-2);
+  }
+
+  /* main: balance header + big click area */
+  .balance-card {
+    grid-area: header;
+    border-radius: 0 0 1rem 1rem;
+  }
+  .event-banner {
+    grid-area: banner;
+  }
+  .click-area {
+    grid-area: click;
+    padding: 2rem;
+  }
+  .clickable {
+    width: 280px;
+    height: 280px;
+    min-width: 280px;
+    min-height: 280px;
+  }
+  .click-art {
+    font-size: 4rem;
+  }
+
+  /* aside: services/upgrades/profile panel, always visible (JS still drives which one is active) */
+  .panel {
+    grid-area: aside;
+    grid-row: 1 / -1;
+    max-height: none;
+    height: 100%;
+    border-left: 1px solid var(--surface-2);
+    padding: 1.25rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .float-plus,
   .shake,
