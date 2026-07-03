@@ -263,13 +263,23 @@ function renderAchievements(s: GameState): void {
 
 // ---- render: stats ----
 
+let lastStatsSig = "";
+
 function renderStats(s: GameState): void {
+  const clicksDisplay = s.stats.clicks.toLocaleString("en-US");
+  const baramiDisplay = formatBoon(s.barami);
+  const livesDisplay = String(s.lives - 1);
+  const allTimeBoonDisplay = formatBoon(s.allTimeBoon);
+  const mediaTaxDisplay = formatBoon(s.stats.mediaTaxPaid);
+  const sig = `${clicksDisplay}|${baramiDisplay}|${livesDisplay}|${allTimeBoonDisplay}|${mediaTaxDisplay}`;
+  if (sig === lastStatsSig) return;
+  lastStatsSig = sig;
   statsBlock.innerHTML = `
-    <div class="stat-row"><span>คลิกทั้งหมด</span><span>${s.stats.clicks.toLocaleString("en-US")}</span></div>
-    <div class="stat-row"><span>บารมี</span><span>${formatBoon(s.barami)}</span></div>
-    <div class="stat-row"><span>เวียนว่ายมาแล้ว</span><span>${s.lives - 1} ครั้ง</span></div>
-    <div class="stat-row"><span>บุญสะสมทั้งหมด</span><span>${formatBoon(s.allTimeBoon)}</span></div>
-    <div class="stat-row"><span>ภาษีสื่อที่จ่ายไป</span><span>${formatBoon(s.stats.mediaTaxPaid)}</span></div>
+    <div class="stat-row"><span>คลิกทั้งหมด</span><span>${clicksDisplay}</span></div>
+    <div class="stat-row"><span>บารมี</span><span>${baramiDisplay}</span></div>
+    <div class="stat-row"><span>เวียนว่ายมาแล้ว</span><span>${livesDisplay} ครั้ง</span></div>
+    <div class="stat-row"><span>บุญสะสมทั้งหมด</span><span>${allTimeBoonDisplay}</span></div>
+    <div class="stat-row"><span>ภาษีสื่อที่จ่ายไป</span><span>${mediaTaxDisplay}</span></div>
   `;
 }
 
