@@ -94,3 +94,17 @@ export function buyClickTier(s: GameState, tier: number): boolean {
   s.boon -= cost; s.clickTier = tier;
   return true;
 }
+
+export function buyUpgrade(s: GameState, id: string): boolean {
+  if (s.upgrades.includes(id)) return false;
+  const u = UPGRADES.find(x => x.id === id); if (!u) return false;
+  if (u.requires && (s.producers[u.requires.producer] ?? 0) < u.requires.count) return false;
+  if (s.boon < u.cost) return false;
+  s.boon -= u.cost; s.upgrades.push(id);
+  return true;
+}
+
+export function availableUpgrades(s: GameState) {
+  return UPGRADES.filter(u => !s.upgrades.includes(u.id) &&
+    (!u.requires || (s.producers[u.requires.producer] ?? 0) >= u.requires.count));
+}
