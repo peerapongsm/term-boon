@@ -3,7 +3,7 @@ import {
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
   canNirvana, nirvana,
 } from "./lib/engine";
-import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, TUNING, GameEvent } from "./lib/data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
 import { initAudio, playSfx, setMuted, isMuted } from "./lib/audio";
 import { save } from "./lib/save";
@@ -34,6 +34,15 @@ const nirvanaBtn = $<HTMLButtonElement>("nirvana-btn");
 const toastLayer = $<HTMLElement>("toast-layer");
 const confirmDialog = $<HTMLDialogElement>("confirm-dialog");
 
+// buff countdown pill layer: no dedicated element in index.html (Task 12 is
+// ui.ts/style.css-only), so it's created once here and appended to the
+// balance card, same pattern as other dynamically-built content in this file.
+const balanceCard = document.querySelector<HTMLElement>(".balance-card")!;
+const buffPillLayer = document.createElement("div");
+buffPillLayer.id = "buff-pills";
+buffPillLayer.className = "buff-pills";
+balanceCard.appendChild(buffPillLayer);
+
 const CLICK_TIER_EMOJI = ["🪙", "🍚", "🎁", "✨", "📱"];
 
 const UNIT_TOASTS: Record<string, string> = {
@@ -59,11 +68,51 @@ function hideBanner(): void {
   eventClaim.onclick = null;
 }
 export function showEventBanner(ev: GameEvent, onClaim: () => void): void {
-  eventClaim.textContent = `${ev.name} — ${ev.desc}`;
+  // styled as a push notification (app parody): icon + app label + title + body
+  eventClaim.innerHTML = `
+    <span class="event-icon">🔔</span>
+    <span class="event-body">
+      <span class="event-app">บุญWallet แจ้งเตือน</span>
+      <span class="event-title">${ev.name}</span>
+      <span class="event-desc">${ev.desc}</span>
+    </span>
+  `;
   eventBanner.hidden = false;
   eventClaim.onclick = () => { onClaim(); hideBanner(); };
   clearTimeout(bannerTimer);
   bannerTimer = setTimeout(hideBanner, TUNING.eventVisibleSec * 1000);
+}
+
+// ---- buff countdown pill (near balance) ----
+
+let lastBuffSig = "";
+let daraTaxSnapshot: number | null = null;
+
+function renderBuffPill(s: GameState, now: number): void {
+  const active = s.buffs.filter(b => b.endsAt > now);
+  const sig = active.map(b => b.eventId).join(",");
+  if (sig !== lastBuffSig) {
+    lastBuffSig = sig;
+    buffPillLayer.innerHTML = active
+      .map(b => `<span class="buff-pill" data-event="${b.eventId}"></span>`)
+      .join("");
+  }
+
+  const hasDara = active.some(b => b.eventId === "dara");
+  if (hasDara && daraTaxSnapshot === null) daraTaxSnapshot = s.stats.mediaTaxPaid;
+  if (!hasDara) daraTaxSnapshot = null;
+
+  buffPillLayer.querySelectorAll<HTMLElement>(".buff-pill").forEach(pill => {
+    const b = active.find(x => x.eventId === pill.dataset.event);
+    const ev = b && EVENTS.find(e => e.id === b.eventId);
+    if (!b || !ev) return;
+    const secLeft = Math.max(0, Math.ceil((b.endsAt - now) / 1000));
+    let text = `${ev.name} · ${secLeft} วิ`;
+    if (ev.id === "dara" && daraTaxSnapshot !== null) {
+      text += ` · ค่าออกสื่อ ${formatBoon(s.stats.mediaTaxPaid - daraTaxSnapshot)} บุญ`;
+    }
+    pill.textContent = text;
+  });
 }
 
 // ---- achievements ----
@@ -72,7 +121,7 @@ export function unlockAchievement(s: GameState, id: string): void {
   if (s.achievements.includes(id)) return;
   s.achievements.push(id);
   const ach = ACHIEVEMENTS.find(a => a.id === id);
-  showToast(`ปลดล็อกความสำเร็จ: ${ach?.name ?? id}`);
+  showToast(ach ? `🏆 ${ach.name} — ${ach.desc}` : `ปลดล็อกความสำเร็จ: ${id}`);
   save(s);
 }
 
@@ -218,22 +267,32 @@ let lastUpgradesSig = "";
 
 function renderUpgrades(s: GameState): void {
   const avail = availableUpgrades(s);
-  const sig = avail.map(u => u.id).join(",");
+  const nextTier = s.clickTier + 1;
+  const showTierRow = nextTier < CLICK_TIERS.length;
+  const sig = `${showTierRow ? nextTier : "-"}|${avail.map(u => u.id).join(",")}`;
   if (sig !== lastUpgradesSig) {
     lastUpgradesSig = sig;
-    panelUpgrades.innerHTML = avail.length
-      ? avail.map(u => `
-        <button class="upgrade-row" data-id="${u.id}">
+    const tierRowHtml = showTierRow
+      ? `<button class="upgrade-row click-tier-row" data-clicktier="${nextTier}">
+          <span class="upgrade-name">อัปเกรดเป็น "${CLICK_TIERS[nextTier]!.name}"</span>
+          <span class="upgrade-cost">${formatBoon(CLICK_TIERS[nextTier]!.cost)} บุญ</span>
+        </button>`
+      : "";
+    const upgradeRowsHtml = avail.map(u => `
+        <button class="upgrade-row${u.id.startsWith("a-") ? " amulet" : ""}" data-id="${u.id}">
           <span class="upgrade-name">${u.name}</span>
           <span class="upgrade-flavor">${u.flavor}</span>
           <span class="upgrade-cost">${formatBoon(u.cost)} บุญ</span>
-        </button>`).join("")
-      : `<p class="empty-hint">ยังไม่มีเครื่องรางให้ซื้อในตอนนี้</p>`;
+        </button>`).join("");
+    panelUpgrades.innerHTML = tierRowHtml + upgradeRowsHtml ||
+      `<p class="empty-hint">ยังไม่มีเครื่องรางให้ซื้อในตอนนี้</p>`;
   }
   panelUpgrades.querySelectorAll<HTMLButtonElement>(".upgrade-row[data-id]").forEach(row => {
     const u = UPGRADES.find(x => x.id === row.dataset.id);
     if (u) row.classList.toggle("unaffordable", s.boon < u.cost);
   });
+  const tierRow = panelUpgrades.querySelector<HTMLButtonElement>(".upgrade-row[data-clicktier]");
+  if (tierRow) tierRow.classList.toggle("unaffordable", s.boon < CLICK_TIERS[nextTier]!.cost);
 }
 
 // ---- render: prestige / nirvana ----
@@ -299,6 +358,7 @@ function checkUnitMilestone(s: GameState): void {
 
 export function renderAll(s: GameState, now: number): void {
   renderBalance(s, now);
+  renderBuffPill(s, now);
   renderClickTier(s);
   renderProducers(s);
   renderUpgrades(s);
@@ -342,9 +402,20 @@ export function bindUI(s: GameState): void {
   });
 
   panelUpgrades.addEventListener("click", (e) => {
-    const row = (e.target as HTMLElement).closest<HTMLButtonElement>(".upgrade-row[data-id]");
+    const target = e.target as HTMLElement;
+    const tierRow = target.closest<HTMLButtonElement>(".upgrade-row[data-clicktier]");
+    if (tierRow?.dataset.clicktier) {
+      const tier = Number(tierRow.dataset.clicktier);
+      if (buyClickTier(s, tier)) playSfx(CLICK_TIERS[tier]!.sfx);
+      return;
+    }
+    const row = target.closest<HTMLButtonElement>(".upgrade-row[data-id]");
     if (!row?.dataset.id) return;
-    buyUpgrade(s, row.dataset.id);
+    const u = UPGRADES.find(x => x.id === row.dataset.id);
+    if (u && buyUpgrade(s, row.dataset.id)) {
+      playSfx("coin");
+      showToast(u.flavor);
+    }
   });
 
   clickTierBuyBtn.addEventListener("click", () => buyClickTier(s, s.clickTier + 1));

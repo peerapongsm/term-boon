@@ -86,19 +86,73 @@ button {
   line-height: 1;
 }
 
-/* ---- event banner ---- */
+/* ---- event banner (styled as a push notification — app parody) ---- */
 
 .event-banner {
   flex-shrink: 0;
   margin: 0.5rem;
 }
 .event-claim {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
   width: 100%;
+  text-align: left;
   border: none;
   border-radius: 1rem;
   padding: 0.75rem 1rem;
+  background: var(--surface);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  animation: notif-in 0.3s ease-out;
+}
+.event-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
   background: var(--accent);
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.event-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.event-app {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.event-title {
+  font-weight: 700;
+  color: var(--fg);
+}
+.event-desc {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+/* ---- buff countdown pill (near balance) ---- */
+
+.buff-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.buff-pill {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
@@ -236,6 +290,18 @@ button {
   opacity: 0.5;
 }
 
+.upgrade-row.amulet {
+  border: 2px solid var(--accent);
+  background: linear-gradient(135deg, var(--surface-2), #f6e9c9);
+}
+.upgrade-row.click-tier-row {
+  background: var(--accent);
+  color: #fff;
+}
+.upgrade-row.click-tier-row .upgrade-cost {
+  color: #fff;
+}
+
 .empty-hint {
   color: var(--fg-muted);
   font-size: 0.85rem;
@@ -367,6 +433,11 @@ button {
   to { transform: translateY(-70px); opacity: 0; }
 }
 
+@keyframes notif-in {
+  from { transform: translateY(-12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-4px) rotate(-1deg); }
@@ -387,7 +458,8 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .float-plus,
-  .shake {
+  .shake,
+  .event-claim {
     animation: none !important;
   }
   .clickable:active {
