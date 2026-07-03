@@ -202,17 +202,6 @@ button {
   text-align: center;
 }
 
-.click-tier-buy-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
-  background: var(--surface-2);
-  font-size: 0.85rem;
-}
-.click-tier-buy-btn.unaffordable {
-  opacity: 0.5;
-}
-
 .float-layer {
   position: absolute;
   inset: 0;
@@ -425,6 +414,132 @@ button {
   justify-content: center;
   z-index: 100;
 }
+.ending-content {
+  width: min(90vw, 360px);
+  text-align: center;
+}
+.ending-stats {
+  margin-bottom: 1.5rem;
+}
+.ending-line {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  margin-bottom: 2.5rem;
+}
+.reenter-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  background: var(--surface-2);
+  color: var(--fg);
+  font-size: 0.75rem;
+}
+
+/* ---- app fade-out (nirvana) ---- */
+
+#app.app-ending {
+  transition: opacity 4s ease;
+  opacity: 0;
+}
+
+/* ---- rebirth interstitial (fade-to-white on prestige) ---- */
+
+.rebirth-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.rebirth-overlay.visible {
+  opacity: 1;
+}
+.rebirth-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+.rebirth-tier-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.rebirth-flavor {
+  font-size: 0.95rem;
+  color: var(--fg-muted);
+}
+
+/* ---- about page ---- */
+
+.about-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+.about-header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+.about-section {
+  margin-top: 1.75rem;
+}
+.about-section h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.about-section p {
+  line-height: 1.6;
+  margin: 0 0 0.75rem;
+}
+.about-guardrails {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+}
+.unit-table-wrap {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: var(--surface);
+  margin-bottom: 1rem;
+}
+.unit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.unit-table th, .unit-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--surface-2);
+}
+.unit-table th {
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+.source-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.source-link, .back-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+.back-link {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
 
 /* ---- animations ---- */
 
@@ -464,5 +579,9 @@ button {
   }
   .clickable:active {
     transform: none;
+  }
+  #app.app-ending,
+  .rebirth-overlay {
+    transition: none !important;
   }
 }

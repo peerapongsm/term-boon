@@ -1,17 +1,22 @@
 import {
   GameState, click, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
-  canNirvana, nirvana,
+  canNirvana, nirvana, reenter,
 } from "./lib/engine";
 import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
 import { initAudio, playSfx, setMuted, isMuted } from "./lib/audio";
 import { save } from "./lib/save";
 
+// Umami snippet is installed in Task 14; guard every call so this file is
+// inert until then.
+declare const umami: { track: (name: string) => void } | undefined;
+
 // ---- DOM refs (cached once at module init; DOM is already parsed since
 // main.ts is a module script placed at end of <body>) ----
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
+const appRoot = $<HTMLElement>("app");
 const boonDisplay = $<HTMLElement>("boon-display");
 const bpsDisplay = $<HTMLElement>("bps-display");
 const rebirthBadge = $<HTMLElement>("rebirth-badge");
@@ -21,7 +26,6 @@ const eventClaim = $<HTMLButtonElement>("event-claim");
 const clickable = $<HTMLButtonElement>("clickable");
 const clickTierArt = $<HTMLElement>("click-tier-art");
 const clickTierName = $<HTMLElement>("click-tier-name");
-const clickTierBuyBtn = $<HTMLButtonElement>("click-tier-buy");
 const floatLayer = $<HTMLElement>("float-layer");
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".tab"));
 const panelServices = $<HTMLElement>("panel-services");
@@ -33,6 +37,15 @@ const prestigeBtn = $<HTMLButtonElement>("prestige-btn");
 const nirvanaBtn = $<HTMLButtonElement>("nirvana-btn");
 const toastLayer = $<HTMLElement>("toast-layer");
 const confirmDialog = $<HTMLDialogElement>("confirm-dialog");
+const endingScreen = $<HTMLElement>("ending-screen");
+
+// rebirth interstitial: no dedicated element in index.html, created once
+// here and appended to <body>, same pattern as the buff pill layer below.
+const rebirthOverlay = document.createElement("div");
+rebirthOverlay.id = "rebirth-overlay";
+rebirthOverlay.className = "rebirth-overlay";
+rebirthOverlay.hidden = true;
+document.body.appendChild(rebirthOverlay);
 
 // buff countdown pill layer: no dedicated element in index.html (Task 12 is
 // ui.ts/style.css-only), so it's created once here and appended to the
@@ -90,11 +103,14 @@ let daraTaxSnapshot: number | null = null;
 
 function renderBuffPill(s: GameState, now: number): void {
   const active = s.buffs.filter(b => b.endsAt > now);
-  const sig = active.map(b => b.eventId).join(",");
+  // keyed by endsAt (not eventId) so two stacked buffs of the same event
+  // (e.g. dara re-triggered while a ตะกรุด-extended one is still running)
+  // each get their own pill instead of colliding on one shared countdown.
+  const sig = active.map(b => `${b.eventId}:${b.endsAt}`).join(",");
   if (sig !== lastBuffSig) {
     lastBuffSig = sig;
     buffPillLayer.innerHTML = active
-      .map(b => `<span class="buff-pill" data-event="${b.eventId}"></span>`)
+      .map(b => `<span class="buff-pill" data-event="${b.eventId}" data-ends="${b.endsAt}"></span>`)
       .join("");
   }
 
@@ -103,7 +119,8 @@ function renderBuffPill(s: GameState, now: number): void {
   if (!hasDara) daraTaxSnapshot = null;
 
   buffPillLayer.querySelectorAll<HTMLElement>(".buff-pill").forEach(pill => {
-    const b = active.find(x => x.eventId === pill.dataset.event);
+    const endsAt = Number(pill.dataset.ends);
+    const b = active.find(x => x.eventId === pill.dataset.event && x.endsAt === endsAt);
     const ev = b && EVENTS.find(e => e.id === b.eventId);
     if (!b || !ev) return;
     const secLeft = Math.max(0, Math.ceil((b.endsAt - now) / 1000));
@@ -168,29 +185,38 @@ function switchTab(name: string): void {
   panelProfile.hidden = name !== "profile";
 }
 
-// ---- confirm dialog (Task 13 fills full content/copy) ----
+// ---- confirm dialog ----
 
-function openConfirm(title: string, message: string, onConfirm: () => void): void {
+function openConfirm(
+  title: string,
+  message: string,
+  onConfirm: () => void,
+  opts: { cancelLabel?: string } = {},
+): void {
   confirmDialog.innerHTML = "";
   const form = document.createElement("form");
   form.method = "dialog";
   form.className = "confirm-form";
   const h3 = document.createElement("h3");
   h3.textContent = title;
-  const p = document.createElement("p");
-  p.textContent = message;
+  const body = document.createElement("div");
+  message.split("\n").forEach(line => {
+    const p = document.createElement("p");
+    p.textContent = line;
+    body.appendChild(p);
+  });
   const actions = document.createElement("div");
   actions.className = "confirm-actions";
   const cancelBtn = document.createElement("button");
   cancelBtn.value = "cancel";
   cancelBtn.className = "secondary-btn";
-  cancelBtn.textContent = "ยกเลิก";
+  cancelBtn.textContent = opts.cancelLabel ?? "ยกเลิก";
   const confirmBtn = document.createElement("button");
   confirmBtn.value = "confirm";
   confirmBtn.className = "danger-btn";
   confirmBtn.textContent = "ยืนยัน";
   actions.append(cancelBtn, confirmBtn);
-  form.append(h3, p, actions);
+  form.append(h3, body, actions);
   confirmDialog.appendChild(form);
   confirmDialog.showModal();
   confirmDialog.addEventListener("close", function handler() {
@@ -213,16 +239,8 @@ function renderClickTier(s: GameState): void {
   clickTierName.textContent = CLICK_TIERS[s.clickTier]!.name;
   clickTierArt.textContent = CLICK_TIER_EMOJI[s.clickTier] ?? "🪙";
   clickTierArt.dataset.tier = String(s.clickTier);
-
-  const nextTier = s.clickTier + 1;
-  if (nextTier >= CLICK_TIERS.length) {
-    clickTierBuyBtn.hidden = true;
-    return;
-  }
-  const next = CLICK_TIERS[nextTier]!;
-  clickTierBuyBtn.hidden = false;
-  clickTierBuyBtn.textContent = `อัปเกรดเป็น "${next.name}" — ${formatBoon(next.cost)} บุญ`;
-  clickTierBuyBtn.classList.toggle("unaffordable", s.boon < next.cost);
+  // click-tier purchase is done from the upgrades panel's click-tier-row
+  // (the canonical purchase surface); this only renders the click button art.
 }
 
 // ---- render: producer (service) rows ----
@@ -284,7 +302,7 @@ function renderUpgrades(s: GameState): void {
           <span class="upgrade-flavor">${u.flavor}</span>
           <span class="upgrade-cost">${formatBoon(u.cost)} บุญ</span>
         </button>`).join("");
-    panelUpgrades.innerHTML = tierRowHtml + upgradeRowsHtml ||
+    panelUpgrades.innerHTML = (tierRowHtml + upgradeRowsHtml) ||
       `<p class="empty-hint">ยังไม่มีเครื่องรางให้ซื้อในตอนนี้</p>`;
   }
   panelUpgrades.querySelectorAll<HTMLButtonElement>(".upgrade-row[data-id]").forEach(row => {
@@ -300,6 +318,68 @@ function renderUpgrades(s: GameState): void {
 function renderPrestigeNirvana(s: GameState): void {
   prestigeBtn.hidden = !canPrestige(s);
   nirvanaBtn.hidden = !canNirvana(s);
+}
+
+// ---- rebirth interstitial (full-screen fade-to-white on prestige) ----
+
+const REBIRTH_FLAVOR: Record<string, string> = {
+  "หมาวัด": "ชาตินี้เกิดเป็นหมาวัด — อย่างน้อยก็ได้อยู่ใกล้บุญ",
+  "มนุษย์เดินดิน": "ชาตินี้เกิดเป็นมนุษย์เดินดิน — เวียนว่ายต่อไปอย่างสามัญ เริ่มทำบุญกันใหม่",
+  "เศรษฐีใจบุญ": "ชาตินี้เกิดเป็นเศรษฐีใจบุญ — มีทุนทำบุญไม่ขาดมือ แต่บุญก็ยังไม่เคยพอ",
+  "เทวดา": "ชาตินี้เกิดเป็นเทวดา — ได้พักในภพที่สุขสบายขึ้นอีกหน่อย",
+  "พรหม": "ชาตินี้เกิดเป็นพรหม — ใกล้ปลายทางแล้ว แต่ก็ยังต้องเวียนว่ายต่อไป",
+};
+
+function showRebirthInterstitial(s: GameState): void {
+  const tier = rebirthTier(s);
+  rebirthOverlay.innerHTML = `
+    <div class="rebirth-content">
+      <div class="rebirth-tier-name">${tier.name}</div>
+      <div class="rebirth-flavor">${REBIRTH_FLAVOR[tier.name] ?? ""}</div>
+    </div>
+  `;
+  rebirthOverlay.classList.remove("visible", "fade-out");
+  rebirthOverlay.hidden = false;
+  requestAnimationFrame(() => rebirthOverlay.classList.add("visible"));
+  setTimeout(() => {
+    rebirthOverlay.classList.remove("visible");
+    rebirthOverlay.classList.add("fade-out");
+    setTimeout(() => { rebirthOverlay.hidden = true; }, 500);
+  }, 2400);
+}
+
+// ---- นิพพาน ending screen ----
+
+function renderEnding(s: GameState): void {
+  endingScreen.innerHTML = `
+    <div class="ending-content">
+      <div class="ending-stats">
+        <div class="stat-row"><span>เวียนว่ายมาแล้ว</span><span>${s.lives - 1} ครั้ง</span></div>
+        <div class="stat-row"><span>บุญสะสมทั้งหมด</span><span>${formatBoon(s.allTimeBoon)}</span></div>
+        <div class="stat-row"><span>คลิกทั้งหมด</span><span>${s.stats.clicks.toLocaleString("en-US")}</span></div>
+        <div class="stat-row"><span>ภาษีสื่อที่จ่ายไป</span><span>${formatBoon(s.stats.mediaTaxPaid)}</span></div>
+      </div>
+      <p class="ending-line">บุญที่แท้ ไม่เคยต้องนับ</p>
+      <button id="reenter-btn" class="reenter-btn">เกิดใหม่อีกครั้ง</button>
+    </div>
+  `;
+  $<HTMLButtonElement>("reenter-btn").addEventListener("click", () => {
+    reenter(s);
+    save(s);
+    location.reload();
+  });
+}
+
+function showEndingNow(s: GameState): void {
+  appRoot.hidden = true;
+  renderEnding(s);
+  endingScreen.hidden = false;
+}
+
+function startNirvanaEnding(s: GameState): void {
+  appRoot.classList.add("app-ending");
+  const delay = reducedMotion() ? 0 : 4000;
+  setTimeout(() => showEndingNow(s), delay);
 }
 
 // ---- render: achievements ----
@@ -418,24 +498,41 @@ export function bindUI(s: GameState): void {
     }
   });
 
-  clickTierBuyBtn.addEventListener("click", () => buyClickTier(s, s.clickTier + 1));
-
   prestigeBtn.addEventListener("click", () => {
     openConfirm(
       "สิ้นอายุขัย",
-      `รีเซ็ตความก้าวหน้าปัจจุบัน แลกด้วยบารมี +${baramiGain(s)} (ภพจะเปลี่ยนตามบารมีสะสม)`,
-      () => { prestige(s); save(s); },
+      `สิ้นอายุขัยชาตินี้ — เริ่มใหม่ทั้งหมด แลกกับ บารมี +${baramiGain(s)} (ผลผลิตถาวร +5%/แต้ม)`,
+      () => {
+        const wasFirst = s.lives === 1;
+        prestige(s);
+        save(s);
+        if (wasFirst && typeof umami !== "undefined") umami.track("first_prestige");
+        showRebirthInterstitial(s);
+      },
     );
   });
   nirvanaBtn.addEventListener("click", () => {
     openConfirm(
       "นิพพาน",
-      "จบเส้นทางแห่งบุญอย่างสมบูรณ์ — ยืนยันหรือไม่?",
-      () => { nirvana(s); save(s); },
+      "การเข้าสู่นิพพานคือการจบเกมอย่างถาวร\n" +
+      "ตัวเลขทั้งหมดจะหายไป และจะไม่มีอะไรให้สะสมอีก\n" +
+      "ความคืบหน้าของท่านจะไม่ถูกลบ แต่หน้าจอสุดท้ายจะคงอยู่\n" +
+      "ยืนยันหรือไม่",
+      () => {
+        nirvana(s);
+        save(s);
+        if (typeof umami !== "undefined") umami.track("nirvana");
+        startNirvanaEnding(s);
+      },
+      { cancelLabel: "กลับไปสะสมต่อ" },
     );
   });
 
   lastUnit = unitFor(s.boon);
   checkAchievements(s);
   setInterval(() => checkAchievements(s), 1000);
+
+  // refresh mid-ending: completed persists across reload, so re-show the
+  // ending screen immediately instead of the fade sequence.
+  if (s.completed) showEndingNow(s);
 }

@@ -14,6 +14,8 @@ function applyOfflineAndReport(state: ReturnType<typeof load>, prevSeen: number)
 }
 
 const state = load();
+// dev-only inspection hook for manual testing (e.g. state.barami = 10000 in console)
+if (import.meta.env.DEV) (window as unknown as { __state: typeof state }).__state = state;
 applyOfflineAndReport(state, state.lastSeen);
 
 bindUI(state);

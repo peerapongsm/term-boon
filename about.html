@@ -1,12 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>เกี่ยวกับ — เติมบุญ</title>
+  <meta name="description" content="เติมบุญ ล้อเลียนวัฒนธรรมทำบุญหวังผลนับแต้ม ไม่ใช่การล้อศรัทธา" />
+  <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
+  <div class="about-page">
+    <header class="about-header">
+      <h1>เกี่ยวกับ เติมบุญ</h1>
+    </header>
+
+    <section class="about-section">
+      <h2>เกมนี้คืออะไร</h2>
+      <p>เติมบุญ เป็นเกม idle clicker ล้อเลียน "วัฒนธรรมทำบุญหวังผล" — การทำบุญที่ถูกทำให้กลายเป็นระบบเศรษฐกิจ นับแต้ม แข่งยอด เร่งความเร็ว เหมือนแอปกระเป๋าเงิน</p>
+      <p>สิ่งที่เกมนี้ล้อ คือ <strong>ระบบเศรษฐกิจของบุญ</strong> (merit economy) ที่แปะป้ายราคาให้ความดี ไม่ใช่การล้อศรัทธา ศาสนา หรือผู้ที่ทำบุญด้วยใจจริง</p>
+    </section>
+
+    <section class="about-section">
+      <h2>ขอบเขตที่เกมนี้ตั้งใจไม่ก้าวข้าม</h2>
+      <ul class="about-guardrails">
+        <li>ไม่มีการรับบริจาคจริงหรือธุรกรรมเงินจริงใด ๆ ในเกมนี้</li>
+        <li>ตัวเลข "บุญ" ในเกมเป็นแต้มสมมติ ไม่ใช่ตัวชี้วัดบุญจริงทางศาสนา</li>
+        <li>ไม่ล้อเลียนพระสงฆ์ วัด หรือหลักคำสอนโดยตรง — เป้าหมายคือพฤติกรรมการตลาดที่ห่อหุ้มบุญ ไม่ใช่ตัวศาสนา</li>
+        <li>ไม่เก็บข้อมูลส่วนบุคคล การวัดผลใช้สถิติการใช้งานแบบไม่ระบุตัวตนเท่านั้น</li>
+      </ul>
+    </section>
+
+    <section class="about-section">
+      <h2>บันไดหน่วยนับแบบบาลี</h2>
+      <p>ตัวเลขบุญในเกมอ้างอิงหน่วยนับปาฬิโบราณ (โกฏิ ปโกฏิ ... อสงไขย) ตามลำดับจริง — ทุกหน่วยห่างกัน 10<sup>7</sup>:</p>
+      <div class="unit-table-wrap">
+        <table class="unit-table">
+          <thead><tr><th>หน่วย</th><th>เท่ากับ</th></tr></thead>
+          <tbody>
+            <tr><td>โกฏิ</td><td>10<sup>7</sup></td></tr>
+            <tr><td>ปโกฏิ</td><td>10<sup>14</sup></td></tr>
+            <tr><td>โกฏิปโกฏิ</td><td>10<sup>21</sup></td></tr>
+            <tr><td>นหุต</td><td>10<sup>28</sup></td></tr>
+            <tr><td>นินนหุต</td><td>10<sup>35</sup></td></tr>
+            <tr><td>อักโขเภนี</td><td>10<sup>42</sup></td></tr>
+            <tr><td>พินทุ</td><td>10<sup>49</sup></td></tr>
+            <tr><td>อพุทะ</td><td>10<sup>56</sup></td></tr>
+            <tr><td>นิระพุทะ</td><td>10<sup>63</sup></td></tr>
+            <tr><td>อหหะ</td><td>10<sup>70</sup></td></tr>
+            <tr><td>อพพะ</td><td>10<sup>77</sup></td></tr>
+            <tr><td>อฏฏะ</td><td>10<sup>84</sup></td></tr>
+            <tr><td>โสคันธิกะ</td><td>10<sup>91</sup></td></tr>
+            <tr><td>อุปละ</td><td>10<sup>98</sup></td></tr>
+            <tr><td>กมุทะ</td><td>10<sup>105</sup></td></tr>
+            <tr><td>ปทุมะ</td><td>10<sup>112</sup></td></tr>
+            <tr><td>ปุณฑริกะ</td><td>10<sup>119</sup></td></tr>
+            <tr><td>อกถาน</td><td>10<sup>126</sup></td></tr>
+            <tr><td>มหากถาน</td><td>10<sup>133</sup></td></tr>
+            <tr><td>อสงไขย</td><td>10<sup>140</sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>แหล่งอ้างอิง:</p>
+      <p class="source-links">
+        <a class="source-link" href="https://th.wikipedia.org/wiki/อสงไขย" target="_blank" rel="noopener noreferrer">Thai Wikipedia — อสงไขย</a>
+        <a class="source-link" href="https://ancient-buddhist-texts.net/Textual-Studies/Grammar/Pali-Numbers.htm" target="_blank" rel="noopener noreferrer">Ānandajoti Bhikkhu — Pāḷi Numbers (Saṅkhyā)</a>
+      </p>
+    </section>
+
+    <p class="about-link"><a class="back-link" href="/index.html">กลับไปทำบุญต่อ</a></p>
+  </div>
 </body>
 </html>
