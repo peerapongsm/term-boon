@@ -1,0 +1,95 @@
+import { PRODUCERS, CLICK_TIERS, UPGRADES, TUNING } from "./data";
+
+export interface ActiveBuff { eventId: string; endsAt: number } // epoch ms
+export interface GameState {
+  boon: number; totalBoon: number; allTimeBoon: number;
+  producers: number[];           // length 11
+  upgrades: string[];            // purchased upgrade ids
+  clickTier: number;             // 0..4 (index of highest owned tier)
+  barami: number; lives: number; completed: boolean;
+  buffs: ActiveBuff[];
+  achievements: string[];
+  stats: { clicks: number; mediaTaxPaid: number };
+  lastSeen: number;              // epoch ms
+}
+
+export function newGame(now = Date.now()): GameState {
+  return {
+    boon: 0, totalBoon: 0, allTimeBoon: 0,
+    producers: PRODUCERS.map(() => 0), upgrades: [], clickTier: 0,
+    barami: 0, lives: 1, completed: false, buffs: [],
+    achievements: [], stats: { clicks: 0, mediaTaxPaid: 0 }, lastSeen: now,
+  };
+}
+
+export const producerCost = (i: number, owned: number) =>
+  PRODUCERS[i]!.baseCost * Math.pow(TUNING.costGrowth, owned);
+export const clickTierCost = (t: number) => CLICK_TIERS[t]!.cost;
+
+function upgradeMults(s: GameState) {
+  let clickMult = 1, buffDur = 1, offlineAdd = 0;
+  const prodMult = PRODUCERS.map(() => 1);
+  let prodAll = 1;
+  for (const id of s.upgrades) {
+    const u = UPGRADES.find(x => x.id === id); if (!u) continue;
+    const e = u.effect;
+    if (e.kind === "click") clickMult *= e.mult;
+    else if (e.kind === "buffDur") buffDur *= e.mult;
+    else if (e.kind === "offlineCap") offlineAdd += e.addHours;
+    else if (e.target === "all") prodAll *= e.mult;
+    else prodMult[e.target] = prodMult[e.target]! * e.mult;
+  }
+  return { clickMult, buffDur, offlineAdd, prodMult, prodAll };
+}
+
+function activeBuffMults(_s: GameState, _now: number) {
+  // filled in Task 6 — until then no active buffs
+  let click = 1, all = 1, taxRate = 0;
+  return { click, all, taxRate };
+}
+
+const baramiMult = (s: GameState) => 1 + TUNING.baramiProdBonus * s.barami;
+
+export function boonPerClick(s: GameState, now = Date.now()): number {
+  const m = upgradeMults(s); const b = activeBuffMults(s, now);
+  return CLICK_TIERS[s.clickTier]!.baseClick * m.clickMult * baramiMult(s) * b.click * b.all;
+}
+
+export function boonPerSecond(s: GameState, now = Date.now()): number {
+  const m = upgradeMults(s); const b = activeBuffMults(s, now);
+  let sum = 0;
+  for (let i = 0; i < PRODUCERS.length; i++)
+    sum += s.producers[i]! * PRODUCERS[i]!.baseRate * m.prodMult[i]!;
+  return sum * m.prodAll * baramiMult(s) * b.all;
+}
+
+function gain(s: GameState, amount: number, taxRate: number): number {
+  const taxed = amount * (1 - taxRate);
+  s.stats.mediaTaxPaid += amount - taxed;
+  s.boon += taxed; s.totalBoon += taxed; s.allTimeBoon += taxed;
+  return taxed;
+}
+
+export function click(s: GameState, now = Date.now()): number {
+  s.stats.clicks++;
+  return gain(s, boonPerClick(s, now), activeBuffMults(s, now).taxRate);
+}
+
+export function tick(s: GameState, dtSec: number, now = Date.now()): number {
+  return gain(s, boonPerSecond(s, now) * dtSec, activeBuffMults(s, now).taxRate);
+}
+
+export function buyProducer(s: GameState, i: number): boolean {
+  const cost = producerCost(i, s.producers[i]!);
+  if (s.boon < cost) return false;
+  s.boon -= cost; s.producers[i] = (s.producers[i] ?? 0) + 1;
+  return true;
+}
+
+export function buyClickTier(s: GameState, tier: number): boolean {
+  if (tier !== s.clickTier + 1) return false;
+  const cost = clickTierCost(tier);
+  if (s.boon < cost) return false;
+  s.boon -= cost; s.clickTier = tier;
+  return true;
+}
