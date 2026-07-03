@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -77,5 +77,35 @@ describe("upgrades", () => {
     expect(availableUpgrades(s).some(u => u.id === "m2-10")).toBe(true);
     expect(availableUpgrades(s).some(u => u.id === "m2-25")).toBe(true);
     expect(availableUpgrades(s).some(u => u.id === "m2-50")).toBe(false);
+  });
+});
+
+describe("events", () => {
+  it("kathin multiplies click ×777 during buff and expires after 7s", () => {
+    const s = newGame(0);
+    const base = boonPerClick(s, 0);
+    triggerEvent(s, "kathin", 0);
+    expect(boonPerClick(s, 1000)).toBeCloseTo(base * 777);
+    expect(boonPerClick(s, 7001)).toBeCloseTo(base);
+  });
+  it("dara doubles income but taxes 7%, tax tracked in stats", () => {
+    const s = newGame(0);
+    s.producers[0] = 10; // 1 bps
+    triggerEvent(s, "dara", 0);
+    tick(s, 1, 1000);
+    expect(s.boon).toBeCloseTo(2 * (1 - 0.07)); // ×2 then −7%
+    expect(s.stats.mediaTaxPaid).toBeCloseTo(2 * 0.07);
+  });
+  it("ตะกรุด extends buff duration ×1.5", () => {
+    const s = newGame(0); s.boon = 1e15; buyUpgrade(s, "a-takrut");
+    triggerEvent(s, "kathin", 0);
+    expect(boonPerClick(s, 10_000)).toBeGreaterThan(1); // 7s×1.5=10.5s still active
+  });
+  it("nextEventDelayMs stays in tuned window", () => {
+    for (const r of [0, 0.5, 0.999]) {
+      const ms = nextEventDelayMs(() => r);
+      expect(ms).toBeGreaterThanOrEqual(60_000);
+      expect(ms).toBeLessThanOrEqual(180_000);
+    }
   });
 });

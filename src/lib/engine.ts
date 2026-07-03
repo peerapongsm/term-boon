@@ -1,4 +1,4 @@
-import { PRODUCERS, CLICK_TIERS, UPGRADES, TUNING } from "./data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, TUNING, EVENTS } from "./data";
 
 export interface ActiveBuff { eventId: string; endsAt: number } // epoch ms
 export interface GameState {
@@ -42,10 +42,16 @@ function upgradeMults(s: GameState) {
   return { clickMult, buffDur, offlineAdd, prodMult, prodAll };
 }
 
-function activeBuffMults(_s: GameState, _now: number) {
-  // filled in Task 6 — until then no active buffs
-  let click = 1, all = 1, taxRate = 0;
-  return { click, all, taxRate };
+function activeBuffMults(s: GameState, now: number) {
+  let clickMult = 1, allMult = 1, taxRate = 0;
+  for (const b of s.buffs) {
+    if (b.endsAt <= now) continue;
+    const ev = EVENTS.find(e => e.id === b.eventId); if (!ev) continue;
+    clickMult *= ev.effect.clickMult ?? 1;
+    allMult *= ev.effect.allMult ?? 1;
+    taxRate = Math.max(taxRate, ev.effect.taxRate ?? 0);
+  }
+  return { click: clickMult, all: allMult, taxRate };
 }
 
 const baramiMult = (s: GameState) => 1 + TUNING.baramiProdBonus * s.barami;
@@ -107,4 +113,19 @@ export function buyUpgrade(s: GameState, id: string): boolean {
 export function availableUpgrades(s: GameState) {
   return UPGRADES.filter(u => !s.upgrades.includes(u.id) &&
     (!u.requires || (s.producers[u.requires.producer] ?? 0) >= u.requires.count));
+}
+
+export function triggerEvent(s: GameState, eventId: string, now: number): void {
+  const ev = EVENTS.find(e => e.id === eventId); if (!ev) return;
+  const dur = ev.durationSec * 1000 * upgradeMults(s).buffDur;
+  s.buffs.push({ eventId, endsAt: now + dur });
+}
+
+export function pruneBuffs(s: GameState, now: number): void {
+  s.buffs = s.buffs.filter(b => b.endsAt > now);
+}
+
+export function nextEventDelayMs(rand: () => number = Math.random): number {
+  const { eventMinGapSec: a, eventMaxGapSec: b } = TUNING;
+  return (a + rand() * (b - a)) * 1000;
 }
