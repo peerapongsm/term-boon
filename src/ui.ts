@@ -372,6 +372,7 @@ function renderEnding(s: GameState): void {
 
 function showEndingNow(s: GameState): void {
   appRoot.hidden = true;
+  appRoot.setAttribute("inert", "");
   renderEnding(s);
   endingScreen.hidden = false;
 }
@@ -450,6 +451,7 @@ export function renderAll(s: GameState, now: number): void {
 
 export function bindUI(s: GameState): void {
   clickable.addEventListener("click", () => {
+    if (s.completed) return;
     initAudio();
     const gained = click(s);
     playSfx(CLICK_TIERS[s.clickTier]!.sfx);
@@ -476,12 +478,14 @@ export function bindUI(s: GameState): void {
   });
 
   panelServices.addEventListener("click", (e) => {
+    if (s.completed) return;
     const row = (e.target as HTMLElement).closest<HTMLButtonElement>(".service-row[data-i]");
     if (!row?.dataset.i) return;
     buyProducer(s, Number(row.dataset.i));
   });
 
   panelUpgrades.addEventListener("click", (e) => {
+    if (s.completed) return;
     const target = e.target as HTMLElement;
     const tierRow = target.closest<HTMLButtonElement>(".upgrade-row[data-clicktier]");
     if (tierRow?.dataset.clicktier) {

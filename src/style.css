@@ -25,10 +25,22 @@ body {
   color: var(--fg);
 }
 
+[hidden] { display: none !important; }
+
 button {
   font: inherit;
   color: inherit;
   cursor: pointer;
+}
+
+.link-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.85rem;
 }
 
 /* ---- app shell ---- */
@@ -338,15 +350,6 @@ button {
 .nirvana-btn { background: var(--nirvana); }
 
 .about-link { margin-top: 1rem; text-align: center; }
-.about-link a {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--fg);
-  text-decoration: none;
-  font-size: 0.85rem;
-}
 
 /* ---- toast ---- */
 
