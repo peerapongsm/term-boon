@@ -21,11 +21,11 @@ export function deserialize(raw: string | null, now = Date.now()): GameState {
   return {
     boon: num(s.boon), totalBoon: num(s.totalBoon), allTimeBoon: num(s.allTimeBoon),
     producers: PRODUCERS.map((_, i) => Math.floor(num((s.producers ?? [])[i]))),
-    upgrades: (Array.isArray(s.upgrades) ? s.upgrades : []).filter((x): x is string => typeof x === "string" && upgradeIds.has(x)),
+    upgrades: [...new Set((Array.isArray(s.upgrades) ? s.upgrades : []).filter((x): x is string => typeof x === "string" && upgradeIds.has(x)))],
     clickTier: Math.min(Math.floor(num(s.clickTier)), 4),
     barami: num(s.barami), lives: Math.max(1, Math.floor(num(s.lives, 1))),
     completed: s.completed === true, buffs: [], // buffs never persist across load
-    achievements: (Array.isArray(s.achievements) ? s.achievements : []).filter((x): x is string => typeof x === "string" && achIds.has(x)),
+    achievements: [...new Set((Array.isArray(s.achievements) ? s.achievements : []).filter((x): x is string => typeof x === "string" && achIds.has(x)))],
     stats: { clicks: Math.floor(num(s.stats?.clicks)), mediaTaxPaid: num(s.stats?.mediaTaxPaid) },
     lastSeen: Math.min(num(s.lastSeen, now), now),
   };

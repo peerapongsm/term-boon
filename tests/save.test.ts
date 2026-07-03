@@ -33,6 +33,12 @@ describe("save round-trip", () => {
     expect(back.producers).toHaveLength(11);
     expect(back.producers[0]).toBe(1);
   });
+  it("dedupes repeated valid ids (multiplier-stacking exploit)", () => {
+    const s = newGame(0); s.upgrades.push("a-ring");
+    const raw = serialize(s).replace('"a-ring"', '"a-ring","a-ring","a-ring"');
+    const back = deserialize(raw, 0);
+    expect(back.upgrades).toEqual(["a-ring"]);
+  });
 });
 
 describe("offline progress", () => {
