@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { newGame, click, tick, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
-  producerCost, boonPerSecond, canPrestige, prestige, canNirvana, baramiGain, GameState } from "../src/lib/engine";
-import { PRODUCERS, CLICK_TIERS, TUNING } from "../src/lib/data";
+  producerCost, canPrestige, prestige, canNirvana, baramiGain, GameState } from "../src/lib/engine";
+import { PRODUCERS } from "../src/lib/data";
 import { applyOffline } from "../src/lib/save";
 
 const CLICKS_PER_SEC = 4;
@@ -36,12 +36,14 @@ describe("pacing gates (binding — tune data.ts numbers if these fail)", () => 
     const s = newGame(0);
     let t = 0;
     while (s.producers.every(p => p === 0) && t < 30) { botSecond(s, t * 1000); t++; }
+    expect(s.producers.some(p => p > 0)).toBe(true);
     expect(t).toBeLessThanOrEqual(30);
   });
   it("first prestige unlocks between 20 and 75 min active", () => {
     const s = newGame(0);
     let sec = 0;
     while (!canPrestige(s) && sec < 75 * 60) { botSecond(s, sec * 1000); sec++; }
+    expect(canPrestige(s)).toBe(true);
     expect(sec).toBeGreaterThanOrEqual(20 * 60);
     expect(sec).toBeLessThanOrEqual(75 * 60);
   }, 120_000);
