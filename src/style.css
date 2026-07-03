@@ -428,12 +428,15 @@ button {
   margin-bottom: 2.5rem;
 }
 .reenter-btn {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   border: none;
   border-radius: 999px;
   padding: 0.4rem 0.9rem;
   background: var(--surface-2);
   color: var(--fg);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 /* ---- app fade-out (nirvana) ---- */
