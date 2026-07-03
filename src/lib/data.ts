@@ -51,16 +51,16 @@ export interface Achievement {
 
 export const PRODUCERS: Producer[] = [
   { name: "ใส่บาตรตอนเช้า", baseCost: 15, baseRate: 0.1, flavor: "ตื่นหกโมงเช้าเพื่อสิ่งนี้" },
-  { name: "ตู้บริจาคอัจฉริยะ", baseCost: 100, baseRate: 1, flavor: "รับเหรียญอัตโนมัติ ไม่ต้องหยอดเอง" },
-  { name: "ปล่อยนกปล่อยปลา", baseCost: 1_100, baseRate: 8, flavor: "นกถูกจับมาให้ท่านปล่อย — วงจรบุญสมบูรณ์แบบ" },
-  { name: "โรงทาน", baseCost: 12_000, baseRate: 47, flavor: "ข้าวแกงฟรี บุญไม่ฟรี" },
-  { name: "ผ้าป่า-กฐินสามัคคี", baseCost: 130_000, baseRate: 260, flavor: "สามัคคีคือพลัง (ของยอดบริจาค)" },
-  { name: "เสาไฟพญานาค", baseCost: 1.4e6, baseRate: 1_400, flavor: "ยิ่งเกล็ดละเอียด บุญยิ่งแรง" },
-  { name: "วัดออนไลน์ สแกน QR", baseCost: 2e7, baseRate: 7_800, flavor: "ทำบุญได้ทุกที่ ยกเว้นที่วัด" },
-  { name: "บุญ Delivery", baseCost: 3.3e8, baseRate: 44_000, flavor: "สังฆทานถึงวัดใน 15 นาที ไม่ทันรับบุญคืนฟรี" },
-  { name: "BunCoin Mining Rig", baseCost: 5.1e9, baseRate: 260_000, flavor: "proof-of-merit consensus" },
-  { name: "ดาวเทียมกระจายบุญ THEOS-บุญ", baseCost: 7.5e10, baseRate: 1.6e6, flavor: "ครอบคลุมทุกพื้นที่ ไม่มีจุดอับบุญ" },
-  { name: "ประตูมิติดาวดึงส์", baseCost: 1e12, baseRate: 1e7, flavor: "ฝากบุญตรงถึงสวรรค์ ไม่ผ่านตัวกลาง" },
+  { name: "ตู้บริจาคอัจฉริยะ", baseCost: 60, baseRate: 0.675, flavor: "รับเหรียญอัตโนมัติ ไม่ต้องหยอดเอง" },
+  { name: "ปล่อยนกปล่อยปลา", baseCost: 240, baseRate: 3.375, flavor: "นกถูกจับมาให้ท่านปล่อย — วงจรบุญสมบูรณ์แบบ" },
+  { name: "โรงทาน", baseCost: 960, baseRate: 16.875, flavor: "ข้าวแกงฟรี บุญไม่ฟรี" },
+  { name: "ผ้าป่า-กฐินสามัคคี", baseCost: 3_840, baseRate: 84.375, flavor: "สามัคคีคือพลัง (ของยอดบริจาค)" },
+  { name: "เสาไฟพญานาค", baseCost: 15_360, baseRate: 421.875, flavor: "ยิ่งเกล็ดละเอียด บุญยิ่งแรง" },
+  { name: "วัดออนไลน์ สแกน QR", baseCost: 61_440, baseRate: 2_109.375, flavor: "ทำบุญได้ทุกที่ ยกเว้นที่วัด" },
+  { name: "บุญ Delivery", baseCost: 1.536e6, baseRate: 42_187.5, flavor: "สังฆทานถึงวัดใน 15 นาที ไม่ทันรับบุญคืนฟรี" },
+  { name: "BunCoin Mining Rig", baseCost: 2.2e6, baseRate: 70_000, flavor: "proof-of-merit consensus" },
+  { name: "ดาวเทียมกระจายบุญ THEOS-บุญ", baseCost: 3.2e6, baseRate: 110_000, flavor: "ครอบคลุมทุกพื้นที่ ไม่มีจุดอับบุญ" },
+  { name: "ประตูมิติดาวดึงส์", baseCost: 4.6e6, baseRate: 170_000, flavor: "ฝากบุญตรงถึงสวรรค์ ไม่ผ่านตัวกลาง" },
 ];
 
 export const CLICK_TIERS: ClickTier[] = [
