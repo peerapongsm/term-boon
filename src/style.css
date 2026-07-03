@@ -291,6 +291,40 @@ button {
   opacity: 0.5;
 }
 
+/* ---- pixel art ---- */
+
+.pix {
+  image-rendering: pixelated;
+}
+.pix-click {
+  width: clamp(96px, 30vw, 128px);
+  height: clamp(96px, 30vw, 128px);
+}
+.service-row {
+  grid-template-columns: auto 1fr auto;
+}
+.pix-icon {
+  width: 48px;
+  height: 48px;
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  align-self: center;
+}
+.service-name { grid-column: 2; }
+.service-flavor { grid-column: 2 / -1; }
+.service-owned, .service-cost { grid-column: 3; }
+.service-row.locked {
+  align-items: center;
+  gap: 0.75rem;
+}
+.service-row.locked .service-cost {
+  margin-left: auto;
+}
+.service-row.locked .pix-icon {
+  filter: brightness(0);
+  opacity: 0.22;
+}
+
 .upgrade-row.amulet {
   border: 2px solid var(--accent);
   background: linear-gradient(135deg, var(--surface-2), #f6e9c9);

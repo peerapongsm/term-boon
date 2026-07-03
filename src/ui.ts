@@ -7,6 +7,7 @@ import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, 
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
 import { initAudio, playSfx, setMuted, isMuted } from "./lib/audio";
 import { save } from "./lib/save";
+import { spriteURL } from "./sprites";
 
 // Umami snippet is installed in Task 14; guard every call so this file is
 // inert until then.
@@ -55,8 +56,6 @@ const buffPillLayer = document.createElement("div");
 buffPillLayer.id = "buff-pills";
 buffPillLayer.className = "buff-pills";
 balanceCard.appendChild(buffPillLayer);
-
-const CLICK_TIER_EMOJI = ["🪙", "🍚", "🎁", "✨", "📱"];
 
 const UNIT_TOASTS: Record<string, string> = {
   "โกฏิ": "ท่านถึงหน่วย โกฏิ แล้ว — สิบล้านบุญ!",
@@ -237,8 +236,10 @@ function renderBalance(s: GameState, now: number): void {
 
 function renderClickTier(s: GameState): void {
   clickTierName.textContent = CLICK_TIERS[s.clickTier]!.name;
-  clickTierArt.textContent = CLICK_TIER_EMOJI[s.clickTier] ?? "🪙";
-  clickTierArt.dataset.tier = String(s.clickTier);
+  if (clickTierArt.dataset.tier !== String(s.clickTier) || !clickTierArt.firstChild) {
+    clickTierArt.dataset.tier = String(s.clickTier);
+    clickTierArt.innerHTML = `<img class="pix pix-click" src="${spriteURL(`tier-${s.clickTier}`)}" alt="">`;
+  }
   // click-tier purchase is done from the upgrades panel's click-tier-row
   // (the canonical purchase surface); this only renders the click button art.
 }
@@ -258,6 +259,7 @@ function renderProducers(s: GameState): void {
     panelServices.innerHTML = PRODUCERS.map((p, i) => {
       if (!revealed[i]) {
         return `<div class="service-row locked" aria-disabled="true">
+          <img class="pix pix-icon" src="${spriteURL(`p${i}`)}" alt="">
           <span class="service-name">???</span>
           <span class="service-cost">???</span>
         </div>`;
@@ -265,6 +267,7 @@ function renderProducers(s: GameState): void {
       const owned = s.producers[i] ?? 0;
       const cost = producerCost(i, owned);
       return `<button class="service-row" data-i="${i}">
+        <img class="pix pix-icon" src="${spriteURL(`p${i}`)}" alt="">
         <span class="service-name">${p.name}</span>
         <span class="service-flavor">${p.flavor}</span>
         <span class="service-owned">×${owned}</span>
