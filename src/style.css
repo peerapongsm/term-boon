@@ -1,0 +1,396 @@
+/* บุญWallet — functional mobile-first layout.
+   Class names are the API for the frontend-design pass (Task 14+); keep them stable.
+   NOTE: all @media blocks live at the END of this file on purpose — base rules
+   declared after a media query would otherwise win by source order. */
+
+:root {
+  --bg: #f4efe6;
+  --surface: #ffffff;
+  --surface-2: #efe6d8;
+  --fg: #2a2117;
+  --fg-muted: #7a6e5c;
+  --accent: #b8862c;
+  --accent-2: #8c5a2b;
+  --danger: #a13a2f;
+  --nirvana: #6a4fa3;
+  --ok: #3f7d4f;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: "Noto Sans Thai", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ---- app shell ---- */
+
+.wallet {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ---- balance card ---- */
+
+.balance-card {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-radius: 0 0 1.5rem 1.5rem;
+  padding: 1.25rem 1rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.balance-label {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+.balance-amount {
+  font-size: clamp(2rem, 9vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  cursor: pointer;
+}
+.balance-rate {
+  font-size: 0.85rem;
+  color: var(--ok);
+}
+.rebirth-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.8rem;
+}
+.icon-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ---- event banner ---- */
+
+.event-banner {
+  flex-shrink: 0;
+  margin: 0.5rem;
+}
+.event-claim {
+  width: 100%;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---- click area ---- */
+
+.click-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+  padding: 1rem;
+}
+
+.clickable {
+  width: min(55vw, 220px);
+  height: min(55vw, 220px);
+  min-width: 200px;
+  min-height: 200px;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--accent), var(--accent-2));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  touch-action: manipulation;
+  user-select: none;
+}
+.clickable:active {
+  transform: scale(0.96);
+}
+.click-art {
+  font-size: 3rem;
+  line-height: 1;
+}
+.click-tier-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.click-tier-buy-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.click-tier-buy-btn.unaffordable {
+  opacity: 0.5;
+}
+
+.float-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.float-plus {
+  position: absolute;
+  top: 40%;
+  font-weight: 700;
+  color: var(--accent);
+  animation: float-up 1s ease-out forwards;
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* ---- tabs + panels ---- */
+
+.tab-bar {
+  flex-shrink: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--surface-2);
+}
+.tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+.tab.active {
+  color: var(--accent-2);
+  font-weight: 700;
+  border-top: 2px solid var(--accent);
+}
+
+.panel {
+  flex-shrink: 0;
+  max-height: 45dvh;
+  overflow-y: auto;
+  background: var(--surface);
+  padding: 0.75rem;
+}
+
+.service-row,
+.upgrade-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.75rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 1rem;
+  background: var(--surface-2);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.5rem;
+}
+.service-name, .upgrade-name { font-weight: 600; grid-column: 1; }
+.service-flavor, .upgrade-flavor { grid-column: 1 / -1; font-size: 0.75rem; color: var(--fg-muted); }
+.service-owned { grid-column: 2; align-self: start; }
+.service-cost, .upgrade-cost { grid-column: 2; align-self: start; font-weight: 600; }
+
+.service-row.locked {
+  background: var(--surface-2);
+  opacity: 0.55;
+  display: flex;
+  justify-content: space-between;
+}
+.service-row.unaffordable,
+.upgrade-row.unaffordable {
+  opacity: 0.5;
+}
+
+.empty-hint {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+/* ---- profile panel ---- */
+
+#achievements-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.achievement-item {
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--surface-2);
+}
+.achievement-item.locked { opacity: 0.45; }
+.achievement-name { display: block; font-weight: 700; font-size: 0.8rem; }
+.achievement-desc { display: block; font-size: 0.7rem; color: var(--fg-muted); }
+
+#stats-block {
+  margin-bottom: 1rem;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 0.85rem;
+}
+
+.danger-btn, .nirvana-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+.danger-btn { background: var(--danger); }
+.nirvana-btn { background: var(--nirvana); }
+
+.about-link { margin-top: 1rem; text-align: center; }
+.about-link a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+/* ---- toast ---- */
+
+.toast-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: none;
+  z-index: 50;
+}
+.toast {
+  background: rgba(20, 16, 10, 0.9);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  max-width: 85vw;
+  text-align: center;
+}
+.toast-out { opacity: 0; }
+
+/* ---- confirm dialog ---- */
+
+#confirm-dialog {
+  border: none;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  max-width: min(90vw, 360px);
+}
+#confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+.confirm-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.confirm-actions button {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem;
+  font-weight: 600;
+}
+.secondary-btn {
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+/* ---- ending ---- */
+
+.ending {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* ---- animations ---- */
+
+@keyframes float-up {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-70px); opacity: 0; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px) rotate(-1deg); }
+  40% { transform: translateX(4px) rotate(1deg); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* ---- media queries (kept at end of file on purpose) ---- */
+
+@media (min-width: 640px) {
+  .wallet {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-plus,
+  .shake {
+    animation: none !important;
+  }
+  .clickable:active {
+    transform: none;
+  }
+}

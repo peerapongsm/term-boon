@@ -1,2 +1,46 @@
-// Main entry point
-console.log("Term Boon - เติมบุญ");
+import { load, save, applyOffline } from "./lib/save";
+import { tick, pruneBuffs, nextEventDelayMs, triggerEvent } from "./lib/engine";
+import { EVENTS, TUNING } from "./lib/data";
+import { formatBoon } from "./lib/units";
+import { renderAll, bindUI, showToast, showEventBanner, unlockAchievement } from "./ui";
+import { playSfx } from "./lib/audio";
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+function applyOfflineAndReport(state: ReturnType<typeof load>, prevSeen: number): void {
+  const gained = applyOffline(state, Date.now());
+  if (gained > 0) showToast(`ระหว่างที่ท่านจากไป ตู้บริจาครับไป ${formatBoon(gained)} บุญ`);
+  if (Date.now() - prevSeen > ONE_DAY_MS) unlockAchievement(state, "true-merit");
+}
+
+const state = load();
+applyOfflineAndReport(state, state.lastSeen);
+
+bindUI(state);
+
+let last = performance.now();
+let nextEventAt = Date.now() + nextEventDelayMs();
+
+function frame(t: number) {
+  const now = Date.now();
+  const dt = Math.min((t - last) / 1000, 1); // clamp: background tab catch-up handled by applyOffline on visibility
+  last = t;
+  if (!state.completed) {
+    tick(state, dt, now);
+    pruneBuffs(state, now);
+    if (now >= nextEventAt) {
+      const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)]!;
+      showEventBanner(ev, () => { triggerEvent(state, ev.id, Date.now()); playSfx("bell"); });
+      nextEventAt = now + nextEventDelayMs() + TUNING.eventVisibleSec * 1000;
+    }
+  }
+  renderAll(state, now);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+setInterval(() => { state.lastSeen = Date.now(); save(state); }, 5000);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { state.lastSeen = Date.now(); save(state); }
+  else { applyOfflineAndReport(state, state.lastSeen); }
+});
