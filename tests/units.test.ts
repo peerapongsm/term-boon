@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatBoon, unitFor, UNITS } from "../src/lib/units";
+import { formatBoon, unitFor, UNITS, fullBreakdown } from "../src/lib/units";
 
 describe("units ladder", () => {
   it("is strictly ascending", () => {
@@ -24,8 +24,27 @@ describe("formatBoon", () => {
   it("clamps between rungs to the lower rung", () => {
     expect(formatBoon(5e12)).toBe("500,000 โกฏิ"); // 1e7 unit, 5e12/1e7=5e5 — still โกฏิ, comma-grouped multiplier
   });
+  it("uses true 3 significant digits across the multiplier range", () => {
+    expect(formatBoon(4.56e8)).toBe("45.6 โกฏิ");
+    expect(formatBoon(4.567e9)).toBe("457 โกฏิ");
+  });
+  it("formats the exact 1e7 boundary", () => {
+    expect(formatBoon(1e7)).toBe("1.00 โกฏิ");
+  });
   it("unitFor returns null below โกฏิ", () => {
     expect(unitFor(999)).toBeNull();
     expect(unitFor(2e7)).toBe("โกฏิ");
+  });
+});
+
+describe("fullBreakdown", () => {
+  it("fullBreakdown includes full figure and unit power", () => {
+    expect(fullBreakdown(12345)).toBe("12,345 บุญ");
+    expect(fullBreakdown(2e7)).toContain("โกฏิ");
+    expect(fullBreakdown(2e7)).toContain("10^7");
+  });
+  it("handles hostile inputs", () => {
+    expect(formatBoon(-5)).toBe("0");
+    expect(formatBoon(NaN)).toBe("0");
   });
 });

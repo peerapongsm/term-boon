@@ -13,6 +13,8 @@
 // consonants — อัพพุทะ/นิรัพพุทะ/อุปปละ/กุมุทะ/กถานะ/มหากถานะ/อักโขภินี
 // instead of อพุทะ/นิระพุทะ/อุปละ/กมุทะ/อกถาน/มหากถาน/อักโขเภนี. Per the
 // data-verify rule, the Thai-rendered form from source [1] is used below.
+//
+// NOTE: rungs 10^70/10^77 (อหหะ/อพพะ) corroborated by source [1] only; source [2] uses different names (atataṁ/apapaṁ) for the same positions.
 export const UNITS: ReadonlyArray<{ pow: number; name: string }> = [
   { pow: 7, name: "โกฏิ" }, { pow: 14, name: "ปโกฏิ" }, { pow: 21, name: "โกฏิปโกฏิ" },
   { pow: 28, name: "นหุต" }, { pow: 35, name: "นินนหุต" }, { pow: 42, name: "อักโขเภนี" },
@@ -37,7 +39,10 @@ export function formatBoon(n: number): string {
   let unit = UNITS[0]!;
   for (const u of UNITS) if (n >= 10 ** u.pow) unit = u; else break;
   const mult = n / 10 ** unit.pow;
-  return mult >= 1000 ? `${group(mult)} ${unit.name}` : `${mult.toFixed(2)} ${unit.name}`;
+  if (mult >= 1000) return `${group(mult)} ${unit.name}`;
+  if (mult >= 100) return `${mult.toFixed(0)} ${unit.name}`;
+  if (mult >= 10) return `${mult.toFixed(1)} ${unit.name}`;
+  return `${mult.toFixed(2)} ${unit.name}`;
 }
 
 export function fullBreakdown(n: number): string {
