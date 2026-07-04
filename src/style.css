@@ -538,6 +538,7 @@ button.upgrade-row:not(.unaffordable):active {
   background: var(--surface-2);
   color: var(--fg);
 }
+.loan-status { margin: 6px 0; font-size: 0.82rem; color: #a5281b; }
 
 /* ---- ending ---- */
 
@@ -563,6 +564,7 @@ button.upgrade-row:not(.unaffordable):active {
   color: var(--fg-muted);
   margin-bottom: 2.5rem;
 }
+.ending-actions { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
 .reenter-btn {
   position: fixed;
   right: 1rem;

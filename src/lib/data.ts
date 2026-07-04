@@ -149,11 +149,13 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "first-producer", name: "เริ่มกิจการ", desc: "ซื้อ producer ตัวแรก" },
   { id: "kot", name: "ถึงโกฏิ", desc: "มีบุญสะสมถึง 1 โกฏิ" },
   { id: "birds-25", name: "นักปล่อยมืออาชีพ", desc: "ปล่อยนกปล่อยปลา 25 จุด" },
-  { id: "all-producers", name: "ครบวงจรบุญ", desc: "เป็นเจ้าของครบทั้ง 11 กิจการ" },
+  { id: "all-producers", name: "ครบวงจรบุญ", desc: "เป็นเจ้าของครบทั้ง 14 กิจการ" },
   { id: "clicks-1000", name: "นิ้วสายบุญ", desc: "คลิกครบ 1,000 ครั้ง" },
   { id: "first-prestige", name: "สิ้นชาติแรก", desc: "เวียนว่ายครั้งแรก" },
   { id: "deva", name: "เกิดเป็นเทวดา", desc: "ถึงภพเทวดา" },
   { id: "nirvana", name: "นิพพาน", desc: "จบเกม" },
+  { id: "arahant", name: "ใกล้ฝั่ง", desc: "ถึงภพอรหันต์" },
+  { id: "samsara-10", name: "วนซ้ำสิบรอบ", desc: "เวียนว่ายหลังนิพพาน 10 รอบ", hidden: true },
   { id: "true-merit", name: "บุญที่แท้", desc: "???", hidden: true },
 ];
 

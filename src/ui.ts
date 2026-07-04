@@ -2,7 +2,7 @@ import {
   GameState, click, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
   canNirvana, nirvana, reenter, creditTarget, auditTaxRate,
-  prestigeBlockedByCredit, rebirthTierIndex, adReady, watchAd,
+  prestigeBlockedByCredit, rebirthTierIndex, adReady, watchAd, takeLoan,
 } from "./lib/engine";
 import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent, AD_COPY } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
@@ -41,6 +41,8 @@ const statsBlock = $<HTMLElement>("stats-block");
 const prestigeBtn = $<HTMLButtonElement>("prestige-btn");
 const nirvanaBtn = $<HTMLButtonElement>("nirvana-btn");
 const watchAdBtn = $<HTMLButtonElement>("watch-ad-btn");
+const loanBtn = $<HTMLButtonElement>("loan-btn");
+const loanStatus = $<HTMLElement>("loan-status");
 const adDialog = $<HTMLDialogElement>("ad-dialog");
 const toastLayer = $<HTMLElement>("toast-layer");
 const confirmDialog = $<HTMLDialogElement>("confirm-dialog");
@@ -159,6 +161,10 @@ function checkAchievements(s: GameState): void {
   const curIdx = REBIRTH_TIERS.findIndex(t => t.name === rebirthTier(s).name);
   if (devaIdx !== -1 && curIdx >= devaIdx) unlockAchievement(s, "deva");
   if (s.completed) unlockAchievement(s, "nirvana");
+  const araIdx = REBIRTH_TIERS.findIndex(t => t.name === "อรหันต์");
+  if (araIdx !== -1 && REBIRTH_TIERS.findIndex(t => t.name === rebirthTier(s).name) >= araIdx)
+    unlockAchievement(s, "arahant");
+  if (s.samsara >= 10) unlockAchievement(s, "samsara-10");
 }
 
 // ---- float / shake fx ----
@@ -429,18 +435,21 @@ function renderEnding(s: GameState): void {
     <div class="ending-content">
       <div class="ending-stats">
         <div class="stat-row"><span>เวียนว่ายมาแล้ว</span><span>${s.lives - 1} ครั้ง</span></div>
+        <div class="stat-row"><span>รอบสังสารวัฏ (หลังนิพพาน)</span><span>${s.samsara}</span></div>
         <div class="stat-row"><span>บุญสะสมทั้งหมด</span><span>${formatBoon(s.allTimeBoon)}</span></div>
         <div class="stat-row"><span>คลิกทั้งหมด</span><span>${s.stats.clicks.toLocaleString("en-US")}</span></div>
-        <div class="stat-row"><span>ภาษีสื่อที่จ่ายไป</span><span>${formatBoon(s.stats.mediaTaxPaid)}</span></div>
       </div>
       <p class="ending-line">บุญที่แท้ ไม่เคยต้องนับ</p>
-      <button id="reenter-btn" class="reenter-btn">เกิดใหม่อีกครั้ง</button>
-    </div>
-  `;
+      <div class="ending-actions">
+        <button id="dissolve-btn" class="secondary-btn">ดับสูญ (จบเกม)</button>
+        <button id="reenter-btn" class="reenter-btn">เวียนว่ายต่อ (เก็บบารมี)</button>
+      </div>
+    </div>`;
   $<HTMLButtonElement>("reenter-btn").addEventListener("click", () => {
-    reenter(s);
-    save(s);
-    location.reload();
+    reenter(s); save(s); location.reload();
+  });
+  $<HTMLButtonElement>("dissolve-btn").addEventListener("click", () => {
+    $<HTMLElement>("ending-screen").querySelector<HTMLElement>(".ending-actions")!.hidden = true;
   });
 }
 
@@ -525,6 +534,13 @@ export function renderAll(s: GameState, now: number): void {
   renderStats(s);
   checkUnitMilestone(s);
   watchAdBtn.hidden = !adReady(s, now);
+  loanBtn.hidden = s.completed || s.loan !== null || boonPerSecond(s, now) <= 0;
+  if (s.loan) {
+    loanStatus.hidden = false;
+    loanStatus.textContent = `หนี้บุญคงเหลือ ${formatBoon(s.loan.remaining)} (หัก 25% ของรายได้)`;
+  } else {
+    loanStatus.hidden = true;
+  }
 }
 
 export function bindUI(s: GameState): void {
@@ -594,6 +610,16 @@ export function bindUI(s: GameState): void {
     );
   });
   watchAdBtn.addEventListener("click", () => { if (adReady(s)) openAd(s); });
+
+  loanBtn.addEventListener("click", () => {
+    if (s.completed || s.loan) return;
+    openConfirm(
+      "สินเชื่อบุญด่วน",
+      "รับบุญก้อนโตทันที แลกกับเครดิตที่ลดลง\nและถูกหักบุญ 25% ของรายได้จนกว่าจะใช้หนี้หมด (ดอกเบี้ย 15%)\nกู้ไหม",
+      () => { takeLoan(s); save(s); playSfx("coin"); },
+      { cancelLabel: "ไม่กู้" },
+    );
+  });
 
   nirvanaBtn.addEventListener("click", () => {
     openConfirm(

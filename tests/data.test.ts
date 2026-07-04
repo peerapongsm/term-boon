@@ -27,10 +27,15 @@ describe("data integrity", () => {
   it("has 7 rebirth tiers ascending from 0", () => {
     expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 20, 80, 200, 1200, 6000]);
   });
-  it("has 7 events and 10 achievements incl. 1 hidden", () => {
+  it("has 7 events and 12 achievements incl. 2 hidden", () => {
     expect(EVENTS).toHaveLength(7);
-    expect(ACHIEVEMENTS).toHaveLength(10);
-    expect(ACHIEVEMENTS.filter(a => a.hidden)).toHaveLength(1);
+    expect(ACHIEVEMENTS).toHaveLength(12);
+    expect(ACHIEVEMENTS.filter(a => a.hidden)).toHaveLength(2);
+  });
+  it("has arahant + samsara achievements", () => {
+    const ids = ACHIEVEMENTS.map(a => a.id);
+    expect(ids).toContain("arahant");
+    expect(ids).toContain("samsara-10");
   });
   it("guardrail: no forbidden symbols in any copy", () => {
     const all = JSON.stringify({ PRODUCERS, CLICK_TIERS, UPGRADES, EVENTS, ACHIEVEMENTS });
