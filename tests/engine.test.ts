@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
   it("new game starts at zero, click gives 1 boon", () => {
     const s = newGame(0);
+    s.credit = 750;
     expect(s.boon).toBe(0);
     expect(click(s, 0)).toBe(1);
     expect(s.boon).toBe(1);
@@ -24,6 +25,7 @@ describe("core engine", () => {
   });
   it("tick accrues bps × dt into boon/totalBoon/allTimeBoon", () => {
     const s = newGame(0);
+    s.credit = 750;
     s.producers[0] = 10;
     tick(s, 5, 0);
     expect(s.boon).toBeCloseTo(10 * PRODUCERS[0]!.baseRate * 5);
@@ -121,6 +123,24 @@ describe("events", () => {
       expect(ms).toBeGreaterThanOrEqual(60_000);
       expect(ms).toBeLessThanOrEqual(180_000);
     }
+  });
+});
+
+describe("audit tax", () => {
+  it("audit tax scales with low credit and is capped by auditImmune", () => {
+    const s = newGame(0);
+    s.credit = 800; expect(auditTaxRate(s)).toBe(0);
+    s.credit = 700; expect(auditTaxRate(s)).toBeCloseTo(0.05);
+    s.credit = 600; expect(auditTaxRate(s)).toBeCloseTo(0.12);
+    s.credit = 400; expect(auditTaxRate(s)).toBeCloseTo(0.25);
+    s.upgrades = ["a-cert"]; expect(auditTaxRate(s)).toBeCloseTo(0.05);   // capped
+  });
+
+  it("idle income is reduced by audit tax", () => {
+    const s = newGame(0); s.producers[0] = 100; s.credit = 400;   // 25% tax
+    const gained = tick(s, 1, 0);
+    const gross = 100 * 0.1;                                       // baseRate
+    expect(gained).toBeCloseTo(gross * 0.75, 5);
   });
 });
 

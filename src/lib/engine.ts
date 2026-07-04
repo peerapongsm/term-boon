@@ -89,13 +89,25 @@ function gain(s: GameState, amount: number, taxRate: number): number {
   return taxed;
 }
 
+export function auditTaxRate(s: GameState): number {
+  let rate: number;
+  if (s.credit >= 750) rate = 0;
+  else if (s.credit >= 650) rate = 0.05;
+  else if (s.credit >= 500) rate = 0.12;
+  else rate = 0.25;
+  if (upgradeMults(s).auditImmune) rate = Math.min(rate, TUNING.auditImmuneCap);
+  return rate;
+}
+
 export function click(s: GameState, now = Date.now()): number {
   s.stats.clicks++;
-  return gain(s, boonPerClick(s, now), activeBuffMults(s, now).taxRate);
+  const tax = Math.max(activeBuffMults(s, now).taxRate, auditTaxRate(s));
+  return gain(s, boonPerClick(s, now), tax);
 }
 
 export function tick(s: GameState, dtSec: number, now = Date.now()): number {
-  return gain(s, boonPerSecond(s, now) * dtSec, activeBuffMults(s, now).taxRate);
+  const tax = Math.max(activeBuffMults(s, now).taxRate, auditTaxRate(s));
+  return gain(s, boonPerSecond(s, now) * dtSec, tax);
 }
 
 export function buyProducer(s: GameState, i: number): boolean {
