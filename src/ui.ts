@@ -35,7 +35,11 @@ const floatLayer = $<HTMLElement>("float-layer");
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".tab"));
 const panelServices = $<HTMLElement>("panel-services");
 const panelUpgrades = $<HTMLElement>("panel-upgrades");
+const panelCredit = $<HTMLElement>("panel-credit");
 const panelProfile = $<HTMLElement>("panel-profile");
+const creditMeter = $<HTMLElement>("credit-meter");
+const creditBureau = $<HTMLElement>("credit-bureau");
+const floatingAd = $<HTMLElement>("floating-ad");
 const achievementsList = $<HTMLElement>("achievements-list");
 const statsBlock = $<HTMLElement>("stats-block");
 const prestigeBtn = $<HTMLButtonElement>("prestige-btn");
@@ -193,6 +197,7 @@ function switchTab(name: string): void {
   tabs.forEach(t => t.classList.toggle("active", t.dataset.panel === name));
   panelServices.hidden = name !== "services";
   panelUpgrades.hidden = name !== "upgrades";
+  panelCredit.hidden = name !== "credit";
   panelProfile.hidden = name !== "profile";
 }
 
@@ -277,6 +282,39 @@ function openAd(s: GameState): void {
   };
 }
 
+// ---- floating intrusive ad (satire — parody of nagging mobile-game ads) ----
+
+floatingAd.innerHTML = `
+  <button class="floating-ad-dismiss" aria-label="ปิดโฆษณา">✕</button>
+  <button class="floating-ad-cta">
+    <span class="floating-ad-sponsor">ผู้สนับสนุน · บุญWallet Ads</span>
+    <span class="floating-ad-headline">🎁 ดูโฆษณาบุญ รับของรางวัลฟรี!</span>
+  </button>
+`;
+
+let floatAdVisible = false;
+let floatAdDismissUntil = 0;
+let floatAdHideTimer: ReturnType<typeof setTimeout> | undefined;
+
+function setFloatAdVisible(show: boolean): void {
+  if (show === floatAdVisible) return;
+  floatAdVisible = show;
+  clearTimeout(floatAdHideTimer);
+  if (show) {
+    floatingAd.hidden = false;
+    if (reducedMotion()) floatingAd.classList.add("show");
+    else requestAnimationFrame(() => floatingAd.classList.add("show"));
+  } else {
+    floatingAd.classList.remove("show");
+    if (reducedMotion()) floatingAd.hidden = true;
+    else floatAdHideTimer = setTimeout(() => { floatingAd.hidden = true; }, 400);
+  }
+}
+
+function renderFloatingAd(s: GameState, now: number): void {
+  setFloatAdVisible(adReady(s, now) && now >= floatAdDismissUntil);
+}
+
 // ---- render: balance / rebirth ----
 
 function renderBalance(s: GameState, now: number): void {
@@ -292,6 +330,65 @@ function renderCredit(s: GameState): void {
   const pct = ((s.credit - 300) / (900 - 300)) * 100;
   creditFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
   creditFill.dataset.band = s.credit >= 750 ? "good" : s.credit >= 500 ? "mid" : "bad";
+}
+
+// ---- render: credit bureau panel (เครดิต tab) ----
+
+const CREDIT_TAX_BANDS = [
+  { min: 750, label: "ดีเยี่ยม", tax: "0%", rangeLabel: "≥ 750" },
+  { min: 650, label: "ดี", tax: "5%", rangeLabel: "650–750" },
+  { min: 500, label: "ปานกลาง", tax: "12%", rangeLabel: "500–650" },
+  { min: 0, label: "ต่ำ", tax: "25%", rangeLabel: "&lt; 500" },
+] as const;
+
+const creditColorBand = (credit: number): "good" | "mid" | "bad" =>
+  credit >= 750 ? "good" : credit >= 500 ? "mid" : "bad";
+
+const creditBandIndex = (credit: number): number =>
+  CREDIT_TAX_BANDS.findIndex(b => credit >= b.min);
+
+let lastCreditPanelSig = "";
+
+function renderCreditPanel(s: GameState): void {
+  const credit = Math.round(s.credit);
+  const blocked = prestigeBlockedByCredit(s);
+  const sig = `${credit}|${blocked}|${s.loan !== null}`;
+  if (sig === lastCreditPanelSig) return;
+  lastCreditPanelSig = sig;
+
+  const bandIdx = creditBandIndex(credit);
+  const band = CREDIT_TAX_BANDS[bandIdx]!;
+  const markerPct = Math.max(0, Math.min(100, ((credit - 300) / 600) * 100));
+  const taxPct = Math.round(auditTaxRate(s) * 100);
+
+  creditBureau.innerHTML = `
+    <div class="credit-statement">
+      <div class="credit-statement-head">รายงานเครดิตบุญ</div>
+      <div class="credit-score" data-band="${creditColorBand(credit)}">${credit}</div>
+      <div class="credit-gauge">
+        <div class="credit-gauge-zones">
+          <span class="zone-low"></span><span class="zone-mid"></span><span class="zone-good"></span><span class="zone-excellent"></span>
+        </div>
+        <div class="credit-gauge-marker" style="left: ${markerPct}%"></div>
+      </div>
+      <div class="credit-band-line">${band.label} · ภาษีตรวจสอบ ${taxPct}%</div>
+      ${s.loan ? `<p class="credit-loan-flag">📄 มีสินเชื่อบุญด่วนค้างชำระ ${formatBoon(s.loan.remaining)} บุญ</p>` : ""}
+      <table class="credit-tax-table">
+        <thead><tr><th>ช่วงเครดิต</th><th>ภาษีตรวจสอบ</th></tr></thead>
+        <tbody>
+          ${CREDIT_TAX_BANDS.map((b, i) => `<tr class="${i === bandIdx ? "current" : ""}"><td>${b.rangeLabel}</td><td>${b.tax}</td></tr>`).join("")}
+        </tbody>
+      </table>
+      <div class="credit-tips-label">วิธีดันเครดิต</div>
+      <div class="credit-tips">
+        <span class="credit-chip">รัวคลิกศรัทธา</span>
+        <span class="credit-chip">ดูโฆษณาบุญ</span>
+        <span class="credit-chip">ลดกิจการสายมอนิไทซ์</span>
+        <span class="credit-chip">เครื่องรางเครดิตดี</span>
+      </div>
+      ${blocked ? `<p class="credit-gate-warning">เครดิตต่ำ (${credit}) — รัวคลิกศรัทธา / ดูโฆษณาบุญ ดันเครดิต ≥ 500 ก่อนเกิดใหม่ ถึงจะขึ้นเทวดาได้</p>` : ""}
+    </div>
+  `;
 }
 
 // ---- render: click tier ----
@@ -525,6 +622,7 @@ function checkUnitMilestone(s: GameState): void {
 export function renderAll(s: GameState, now: number): void {
   renderBalance(s, now);
   renderCredit(s);
+  renderCreditPanel(s);
   renderBuffPill(s, now);
   renderClickTier(s);
   renderProducers(s);
@@ -532,6 +630,7 @@ export function renderAll(s: GameState, now: number): void {
   renderPrestigeNirvana(s);
   renderAchievements(s);
   renderStats(s);
+  renderFloatingAd(s, now);
   checkUnitMilestone(s);
   watchAdBtn.hidden = !adReady(s, now);
   loanBtn.hidden = s.completed || s.loan !== null || boonPerSecond(s, now) <= 0;
@@ -575,6 +674,19 @@ export function bindUI(s: GameState): void {
   boonDisplay.addEventListener("click", showBreakdown);
   boonDisplay.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showBreakdown(); }
+  });
+
+  creditMeter.addEventListener("click", () => switchTab("credit"));
+  creditMeter.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); switchTab("credit"); }
+  });
+
+  floatingAd.querySelector<HTMLButtonElement>(".floating-ad-cta")!.addEventListener("click", () => {
+    if (adReady(s)) openAd(s);
+  });
+  floatingAd.querySelector<HTMLButtonElement>(".floating-ad-dismiss")!.addEventListener("click", () => {
+    floatAdDismissUntil = Date.now() + 60_000;
+    setFloatAdVisible(false);
   });
 
   panelServices.addEventListener("click", (e) => {

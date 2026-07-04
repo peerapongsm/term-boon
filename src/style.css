@@ -331,8 +331,8 @@ button {
 .tab-bar {
   flex-shrink: 0;
   display: flex;
-  gap: 0.3rem;
-  padding: 0.35rem 0.5rem;
+  gap: 0.25rem;
+  padding: 0.35rem 0.35rem;
   background: var(--surface);
   border-top: 2px solid var(--surface-2);
 }
@@ -341,10 +341,11 @@ button {
   border: none;
   border-radius: 999px;
   background: transparent;
-  padding: 0.55rem 0.5rem;
-  font-size: 0.85rem;
+  padding: 0.55rem 0.3rem;
+  font-size: clamp(0.68rem, 3.2vw, 0.85rem);
   font-weight: 600;
   color: var(--fg-muted);
+  white-space: nowrap;
 }
 .tab.active {
   color: #fff;
@@ -799,19 +800,25 @@ button.upgrade-row:not(.unaffordable):active {
   .shake,
   .event-claim,
   .clickable,
-  .click-area::before {
+  .click-area::before,
+  .floating-ad.show {
     animation: none !important;
   }
   .clickable:active {
     transform: none;
   }
   #app.app-ending,
-  .rebirth-overlay {
+  .rebirth-overlay,
+  .floating-ad {
     transition: none !important;
   }
 }
 
-.credit-meter { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.82rem; }
+.credit-meter { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.82rem;
+  cursor: pointer; transition: opacity 0.15s ease; border-radius: 999px; }
+.credit-meter:hover { opacity: 0.85; }
+.credit-meter:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.credit-meter::after { content: "›"; color: var(--fg-muted); font-weight: 700; }
 .credit-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.15); overflow: hidden; }
 .credit-fill { height: 100%; transition: width 0.4s ease; }
 .credit-fill[data-band="good"] { background: #3fa34d; }
@@ -819,6 +826,156 @@ button.upgrade-row:not(.unaffordable):active {
 .credit-fill[data-band="bad"] { background: #c0392b; }
 .credit-gate-hint { margin: 8px 0; padding: 8px 12px; border-radius: 8px;
   background: #fdecea; color: #a5281b; font-size: 0.85rem; border: 1.5px solid #e6b0aa; }
+
+/* ---- credit bureau statement (เครดิต tab) ---- */
+
+.credit-statement {
+  background: var(--surface);
+  border: 2px solid rgba(59, 42, 26, 0.14);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 2px 0 rgba(59, 42, 26, 0.12);
+}
+.credit-statement-head {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--accent-2);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.credit-score {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 12vw, 3rem);
+  line-height: 1.1;
+  text-align: center;
+}
+.credit-score[data-band="good"] { color: var(--ok); }
+.credit-score[data-band="mid"] { color: var(--accent); }
+.credit-score[data-band="bad"] { color: var(--danger); }
+.credit-gauge { position: relative; margin: 0.75rem 0 1.1rem; }
+.credit-gauge-zones { display: flex; height: 10px; border-radius: 999px; overflow: hidden; }
+.credit-gauge-zones .zone-low { flex: 33.33 0 0; background: #c0392b; }
+.credit-gauge-zones .zone-mid { flex: 25 0 0; background: #d9a41a; }
+.credit-gauge-zones .zone-good { flex: 16.67 0 0; background: #9bbf3f; }
+.credit-gauge-zones .zone-excellent { flex: 25 0 0; background: #3fa34d; }
+.credit-gauge-marker {
+  position: absolute;
+  top: -3px;
+  width: 4px;
+  height: 16px;
+  background: var(--fg);
+  border-radius: 2px;
+  translate: -50% 0;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.credit-band-line {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--fg-muted);
+  margin-bottom: 0.75rem;
+}
+.credit-loan-flag {
+  font-size: 0.78rem;
+  color: var(--danger);
+  margin: 0 0 0.75rem;
+  text-align: center;
+}
+.credit-tax-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 0.9rem; }
+.credit-tax-table th, .credit-tax-table td { padding: 0.35rem 0.5rem; text-align: left; border-bottom: 1px solid var(--surface-2); }
+.credit-tax-table th { color: var(--fg-muted); font-weight: 600; }
+.credit-tax-table tr.current td { background: rgba(184, 134, 44, 0.16); font-weight: 700; color: var(--accent-2); }
+.credit-tips-label { font-size: 0.8rem; font-weight: 700; color: var(--fg-muted); margin-bottom: 0.4rem; }
+.credit-tips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.credit-chip {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1.5px solid rgba(184, 134, 44, 0.4);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+.credit-gate-warning {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #a5281b;
+  font-size: 0.82rem;
+  border: 1.5px solid #e6b0aa;
+}
+#panel-credit #loan-btn { margin-top: 0.75rem; }
+
+/* ---- floating intrusive ad (satire — deliberately garish vs. the app) ---- */
+
+.floating-ad {
+  position: fixed;
+  right: 0.75rem;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  width: min(72vw, 250px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ff5e3a, #ffb703 55%, #b8862c);
+  border: 3px solid #fff2cf;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(255, 94, 58, 0.4);
+  transform: translateX(140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+.floating-ad.show {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  animation: floating-ad-pulse 1.6s ease-in-out infinite;
+}
+@keyframes floating-ad-pulse {
+  0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(255, 94, 58, 0.4); }
+  50% { box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4), 0 0 0 8px rgba(255, 183, 3, 0.35); }
+}
+.floating-ad-dismiss {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0;
+}
+.floating-ad-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #fff;
+  padding: 0.9rem 1.4rem 0.75rem 0.9rem;
+  text-align: left;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.floating-ad-sponsor {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.floating-ad-headline {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+@media (min-width: 1024px) {
+  .floating-ad { bottom: 1rem; }
+}
 
 .ad-dialog { border: none; border-radius: 12px; padding: 0; max-width: 340px; }
 .ad-dialog::backdrop { background: rgba(0,0,0,0.6); }

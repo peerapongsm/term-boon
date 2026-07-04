@@ -23,7 +23,7 @@
       <div class="balance-amount" id="boon-display" tabindex="0">0</div>
       <div class="balance-rate" id="bps-display">+0 บุญ/วิ</div>
       <div class="rebirth-badge" id="rebirth-badge">ภพ: หมาวัด</div>
-      <div class="credit-meter" id="credit-meter" title="เครดิตบุญ">
+      <div class="credit-meter" id="credit-meter" title="เครดิตบุญ" role="button" tabindex="0" aria-label="ดูรายงานเครดิตบุญ">
         <span class="credit-label">เครดิตบุญ</span>
         <span class="credit-value" id="credit-value">650</span>
         <div class="credit-bar"><div class="credit-fill" id="credit-fill"></div></div>
@@ -48,11 +48,17 @@
     <nav class="tab-bar">
       <button class="tab active" data-panel="services">บริการ</button>
       <button class="tab" data-panel="upgrades">เครื่องราง</button>
+      <button class="tab" data-panel="credit">เครดิต</button>
       <button class="tab" data-panel="profile">โปรไฟล์</button>
     </nav>
 
     <section id="panel-services" class="panel"></section>
     <section id="panel-upgrades" class="panel" hidden></section>
+    <section id="panel-credit" class="panel" hidden>
+      <div id="credit-bureau"></div>
+      <button id="loan-btn" class="secondary-btn" hidden>💸 สินเชื่อบุญด่วน</button>
+      <p id="loan-status" class="loan-status" hidden></p>
+    </section>
     <section id="panel-profile" class="panel" hidden>
       <div id="achievements-list"></div>
       <div id="stats-block"></div>
@@ -60,11 +66,10 @@
       <button id="prestige-btn" class="danger-btn" hidden>สิ้นอายุขัย</button>
       <button id="nirvana-btn" class="nirvana-btn" hidden>นิพพาน</button>
       <button id="watch-ad-btn" class="secondary-btn" hidden>📺 ดูโฆษณาบุญ (รับรางวัล)</button>
-      <button id="loan-btn" class="secondary-btn" hidden>💸 สินเชื่อบุญด่วน</button>
-      <p id="loan-status" class="loan-status" hidden></p>
       <p class="about-link"><a href="/about.html" class="link-btn">เกี่ยวกับเกมนี้</a></p>
     </section>
 
+    <div id="floating-ad" class="floating-ad" hidden></div>
     <div id="toast-layer" class="toast-layer" aria-live="polite"></div>
     <dialog id="confirm-dialog"></dialog>
   </div>
