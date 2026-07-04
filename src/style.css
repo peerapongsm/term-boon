@@ -820,11 +820,11 @@ button.upgrade-row:not(.unaffordable):active {
   .balance-card { order: 0; }
   .news-ticker { order: 1; }
   .event-banner { order: 1; }
-  .click-area { order: 2; display: none; }
-  .panel { order: 2; flex: 1; max-height: none; }
+  .click-area { order: 2; display: none !important; }
+  .panel { order: 2; flex: 1 1 auto !important; max-height: none !important; }
   .tab-bar { order: 3; }
 
-  .wallet[data-view="home"] .click-area { display: flex; }
+  .wallet[data-view="home"] .click-area { display: flex !important; }
 
   .tab { flex-direction: column; gap: 0.15rem; padding: 0.4rem 0.15rem; }
   .tab-icon { font-size: 1.15rem; }
