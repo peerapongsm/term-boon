@@ -258,6 +258,7 @@ function openAd(s: GameState): void {
     left--;
     if (left <= 0) { clearInterval(timer); render(true); } else render(false);
   }, 1000);
+  adDialog.onclose = () => { clearInterval(timer); adDialog.onclick = null; adDialog.onclose = null; };
   adDialog.onclick = (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".ad-reward");
     if (btn?.dataset.r) {
