@@ -1,8 +1,8 @@
 import {
   GameState, click, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
-  canNirvana, nirvana, reenter, creditTarget, auditTaxRate,
-  prestigeBlockedByCredit, rebirthTierIndex, adReady, watchAd, takeLoan,
+  canNirvana, nirvana, reenter, auditTaxRate,
+  prestigeBlockedByCredit, adReady, watchAd, takeLoan,
 } from "./lib/engine";
 import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent, AD_COPY, NEWS_ECHO } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
