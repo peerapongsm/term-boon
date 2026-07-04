@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -183,5 +183,17 @@ describe("prestige", () => {
     expect(baramiGain(base)).toBe(14);
     base.credit = 900;                   // bonus 1.5 → 10×1.4×1.5 = 21
     expect(baramiGain(base)).toBe(21);
+  });
+  it("monetize-heavy build has a low target, wholesome-heavy a high one", () => {
+    const mon = newGame(0); mon.producers[8] = 50;           // BunCoin only
+    const who = newGame(0); who.producers[0] = 50;           // ใส่บาตร only
+    expect(creditTarget(mon)).toBeLessThan(500);
+    expect(creditTarget(who)).toBeGreaterThan(750);
+  });
+  it("creditTick drifts toward target and clamps, decaying overshoot", () => {
+    const s = newGame(0); s.producers[8] = 50; s.credit = 900;   // overshoot above low target
+    creditTick(s, 1);
+    expect(s.credit).toBeLessThan(900);                          // decays toward low target
+    expect(s.credit).toBeGreaterThanOrEqual(300);
   });
 });

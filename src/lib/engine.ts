@@ -150,6 +150,32 @@ export function creditBonus(credit: number): number {
   return 1.0 + (credit - 650) / (900 - 650) * (1.5 - 1.0);
 }
 
+export function creditTarget(s: GameState, now = Date.now()): number {
+  const m = upgradeMults(s);
+  let mon = 0, who = 0, total = 0;
+  for (let i = 0; i < PRODUCERS.length; i++) {
+    const bps = s.producers[i]! * PRODUCERS[i]!.baseRate * m.prodMult[i]!;
+    total += bps;
+    if (PRODUCERS[i]!.klass === "monetize") mon += bps;
+    else if (PRODUCERS[i]!.klass === "wholesome") who += bps;
+  }
+  const monShare = total > 0 ? mon / total : 0;
+  const whoShare = total > 0 ? who / total : 0;
+  const raw = TUNING.creditBaseline
+    - TUNING.creditShareMonetize * monShare
+    + TUNING.creditShareWholesome * whoShare
+    + m.creditDrift;
+  return Math.min(Math.max(raw, TUNING.creditMin), TUNING.creditMax);
+}
+
+export function creditTick(s: GameState, dtSec: number, now = Date.now()): void {
+  const target = creditTarget(s, now);
+  const step = TUNING.creditDriftPerSec * dtSec;
+  if (s.credit < target) s.credit = Math.min(target, s.credit + step);
+  else if (s.credit > target) s.credit = Math.max(target, s.credit - step);
+  s.credit = Math.min(Math.max(s.credit, TUNING.creditMin), TUNING.creditMax);
+}
+
 export function rebirthTierIndex(s: GameState): number {
   let idx = 0;
   for (let i = 0; i < REBIRTH_TIERS.length; i++) if (s.barami >= REBIRTH_TIERS[i]!.baramiFloor) idx = i;
