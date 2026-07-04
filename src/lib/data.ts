@@ -13,7 +13,9 @@ export type UpgradeEffect =
   | { kind: "prod"; target: number | "all"; mult: number }
   | { kind: "click"; mult: number }
   | { kind: "buffDur"; mult: number }
-  | { kind: "offlineCap"; addHours: number };
+  | { kind: "offlineCap"; addHours: number }
+  | { kind: "creditDrift"; add: number }
+  | { kind: "auditImmune" };
 
 export interface Upgrade {
   id: string;
@@ -41,7 +43,8 @@ export interface GameEvent {
   name: string;
   desc: string;
   durationSec: number;
-  effect: { clickMult?: number; allMult?: number; taxRate?: number };
+  effect: { clickMult?: number; allMult?: number; taxRate?: number; creditDelta?: number };
+  random?: boolean;                   // default true; false = never auto-triggered
 }
 
 export interface Achievement {
@@ -115,6 +118,8 @@ const amulets: Upgrade[] = [
   { id: "a-soi", name: "สร้อยประคำไม้หายาก", cost: 5e7, flavor: "บุญไหลแม้หลับ — offline cap +4 ชม.", effect: { kind: "offlineCap", addHours: 4 } },
   { id: "a-liam", name: "พระเลี่ยมทองรุ่นลิมิเต็ด", cost: 1e9, flavor: "ของแท้ต้องมีใบเซอร์ — ทุกอย่าง ×2", effect: { kind: "prod", target: "all", mult: 2 } },
   { id: "a-phone", name: "มือถือเปิดธรรมะ 24 ชม.", cost: 1e11, flavor: "บุญ ambient ทั้งบ้าน ×1.77", effect: { kind: "prod", target: "all", mult: 1.77 } },
+  { id: "a-credit", name: "เครื่องรางเครดิตดี", cost: 5e8, flavor: "เครดิตบุญนิ่งขึ้น — ดันจุดสมดุล +100", effect: { kind: "creditDrift", add: 100 } },
+  { id: "a-cert", name: "ใบเซอร์บุญแท้", cost: 5e9, flavor: "มีใบรับรอง — ภาษีตรวจสอบไม่เกิน 5%", effect: { kind: "auditImmune" } },
 ];
 
 export const UPGRADES: Upgrade[] = [...milestoneUpgrades, ...amulets];
@@ -132,6 +137,11 @@ export const REBIRTH_TIERS: RebirthTier[] = [
 export const EVENTS: GameEvent[] = [
   { id: "kathin", name: "เศรษฐีทอดกฐิน", desc: "คลิก ×777 นาน 7 วินาที!", durationSec: 7, effect: { clickMult: 777 } },
   { id: "dara", name: "ดาราแวะทำบุญ (มีกล้องตาม)", desc: "ทุกอย่าง ×2 นาน 77 วิ หักค่าออกสื่อ 7%", durationSec: 77, effect: { allMult: 2, taxRate: 0.07 } },
+  { id: "lotto", name: "ข่าวลือเจ้าสำนักถูกหวย", desc: "ศรัทธาแห่ — ยอดบริจาค ×3 นาน 30 วิ", durationSec: 30, effect: { allMult: 3 } },
+  { id: "audit", name: "ดราม่าเงินทอน (ตรวจสอบ)", desc: "ถูกเพ่งเล็ง — ภาษี 20% นาน 40 วิ", durationSec: 40, effect: { taxRate: 0.2, creditDelta: -30 } },
+  { id: "influ", name: "อินฟลูฯ สายบุญไลฟ์สด", desc: "คลิก ×50 นาน 20 วิ", durationSec: 20, effect: { clickMult: 50 } },
+  { id: "tour", name: "ทัวร์ลง (คอมเมนต์ถล่ม)", desc: "เครดิตร่วง แต่คนเห็นเยอะ — ทุกอย่าง ×2 นาน 25 วิ", durationSec: 25, effect: { allMult: 2, creditDelta: -20 } },
+  { id: "ad-x2", name: "บุญคูณผู้สนับสนุน", desc: "ทุกอย่าง ×2 นาน 90 วิ (จากโฆษณา)", durationSec: 90, effect: { allMult: 2 }, random: false },
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [

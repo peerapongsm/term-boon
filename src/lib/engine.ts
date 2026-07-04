@@ -35,7 +35,7 @@ export const producerCost = (i: number, owned: number) =>
 export const clickTierCost = (t: number) => CLICK_TIERS[t]!.cost;
 
 function upgradeMults(s: GameState) {
-  let clickMult = 1, buffDur = 1, offlineAdd = 0;
+  let clickMult = 1, buffDur = 1, offlineAdd = 0, creditDrift = 0, auditImmune = false;
   const prodMult = PRODUCERS.map(() => 1);
   let prodAll = 1;
   for (const id of s.upgrades) {
@@ -44,11 +44,16 @@ function upgradeMults(s: GameState) {
     if (e.kind === "click") clickMult *= e.mult;
     else if (e.kind === "buffDur") buffDur *= e.mult;
     else if (e.kind === "offlineCap") offlineAdd += e.addHours;
+    else if (e.kind === "creditDrift") creditDrift += e.add;
+    else if (e.kind === "auditImmune") auditImmune = true;
     else if (e.target === "all") prodAll *= e.mult;
     else prodMult[e.target] = prodMult[e.target]! * e.mult;
   }
-  return { clickMult, buffDur, offlineAdd, prodMult, prodAll };
+  return { clickMult, buffDur, offlineAdd, prodMult, prodAll, creditDrift, auditImmune };
 }
+
+export const creditDriftFromUpgrades = (s: GameState) => upgradeMults(s).creditDrift;
+export const hasAuditImmune = (s: GameState) => upgradeMults(s).auditImmune;
 
 function activeBuffMults(s: GameState, now: number) {
   let clickMult = 1, allMult = 1, taxRate = 0;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, canNirvana, nirvana, reenter } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -85,6 +85,12 @@ describe("upgrades", () => {
     expect(availableUpgrades(s).some(u => u.id === "m2-10")).toBe(true);
     expect(availableUpgrades(s).some(u => u.id === "m2-25")).toBe(true);
     expect(availableUpgrades(s).some(u => u.id === "m2-50")).toBe(false);
+  });
+  it("credit amulets contribute drift and immunity", () => {
+    const s = newGame(0);
+    s.upgrades = ["a-credit", "a-cert"];
+    expect(creditDriftFromUpgrades(s)).toBe(100);
+    expect(hasAuditImmune(s)).toBe(true);
   });
 });
 

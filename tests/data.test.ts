@@ -14,21 +14,21 @@ describe("data integrity", () => {
     expect(CLICK_TIERS[0]!.cost).toBe(0);
     for (let i = 1; i < 5; i++) expect(CLICK_TIERS[i]!.cost).toBeGreaterThan(CLICK_TIERS[i - 1]!.cost);
   });
-  it("has 42 producer-milestone upgrades (3 per producer at 10/25/50) + 6 amulets", () => {
+  it("has 42 producer-milestone upgrades (3 per producer at 10/25/50) + 8 amulets", () => {
     const milestones = UPGRADES.filter(u => u.requires);
     expect(milestones).toHaveLength(42);
     for (let p = 0; p < 14; p++) {
       const counts = milestones.filter(u => u.requires!.producer === p).map(u => u.requires!.count).sort((a, b) => a - b);
       expect(counts).toEqual([10, 25, 50]);
     }
-    expect(UPGRADES.filter(u => !u.requires)).toHaveLength(6);
+    expect(UPGRADES.filter(u => !u.requires)).toHaveLength(8);
     expect(new Set(UPGRADES.map(u => u.id)).size).toBe(UPGRADES.length);
   });
   it("has 7 rebirth tiers ascending from 0", () => {
     expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 20, 80, 200, 1200, 6000]);
   });
-  it("has 2 events and 10 achievements incl. 1 hidden", () => {
-    expect(EVENTS).toHaveLength(2);
+  it("has 7 events and 10 achievements incl. 1 hidden", () => {
+    expect(EVENTS).toHaveLength(7);
     expect(ACHIEVEMENTS).toHaveLength(10);
     expect(ACHIEVEMENTS.filter(a => a.hidden)).toHaveLength(1);
   });
