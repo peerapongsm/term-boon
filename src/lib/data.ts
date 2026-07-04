@@ -5,6 +5,8 @@ export interface Producer {
   baseCost: number;
   baseRate: number;
   flavor: string;
+  klass: "wholesome" | "neutral" | "monetize";
+  creditRate: number;                 // per-owned credit pressure (informational; share math uses klass)
 }
 
 export type UpgradeEffect =
@@ -50,17 +52,20 @@ export interface Achievement {
 }
 
 export const PRODUCERS: Producer[] = [
-  { name: "ใส่บาตรตอนเช้า", baseCost: 15, baseRate: 0.1, flavor: "ตื่นหกโมงเช้าเพื่อสิ่งนี้" },
-  { name: "ตู้บริจาคอัจฉริยะ", baseCost: 60, baseRate: 0.675, flavor: "รับเหรียญอัตโนมัติ ไม่ต้องหยอดเอง" },
-  { name: "ปล่อยนกปล่อยปลา", baseCost: 240, baseRate: 3.375, flavor: "นกถูกจับมาให้ท่านปล่อย — วงจรบุญสมบูรณ์แบบ" },
-  { name: "โรงทาน", baseCost: 960, baseRate: 16.875, flavor: "ข้าวแกงฟรี บุญไม่ฟรี" },
-  { name: "ผ้าป่า-กฐินสามัคคี", baseCost: 3_840, baseRate: 84.375, flavor: "สามัคคีคือพลัง (ของยอดบริจาค)" },
-  { name: "เสาไฟพญานาค", baseCost: 15_360, baseRate: 421.875, flavor: "ยิ่งเกล็ดละเอียด บุญยิ่งแรง" },
-  { name: "วัดออนไลน์ สแกน QR", baseCost: 61_440, baseRate: 2_109.375, flavor: "ทำบุญได้ทุกที่ ยกเว้นที่วัด" },
-  { name: "บุญ Delivery", baseCost: 1.536e6, baseRate: 42_187.5, flavor: "สังฆทานถึงวัดใน 15 นาที ไม่ทันรับบุญคืนฟรี" },
-  { name: "BunCoin Mining Rig", baseCost: 2.2e6, baseRate: 70_000, flavor: "proof-of-merit consensus" },
-  { name: "ดาวเทียมกระจายบุญ THEOS-บุญ", baseCost: 3.2e6, baseRate: 110_000, flavor: "ครอบคลุมทุกพื้นที่ ไม่มีจุดอับบุญ" },
-  { name: "ประตูมิติดาวดึงส์", baseCost: 4.6e6, baseRate: 170_000, flavor: "ฝากบุญตรงถึงสวรรค์ ไม่ผ่านตัวกลาง" },
+  { name: "ใส่บาตรตอนเช้า", baseCost: 15, baseRate: 0.1, klass: "wholesome", creditRate: 0.4, flavor: "ตื่นหกโมงเช้าเพื่อสิ่งนี้" },
+  { name: "ตู้บริจาคอัจฉริยะ", baseCost: 60, baseRate: 0.675, klass: "wholesome", creditRate: 0.2, flavor: "รับเหรียญอัตโนมัติ ไม่ต้องหยอดเอง" },
+  { name: "ปล่อยนกปล่อยปลา", baseCost: 240, baseRate: 3.375, klass: "wholesome", creditRate: 0.2, flavor: "นกถูกจับมาให้ท่านปล่อย — วงจรบุญสมบูรณ์แบบ" },
+  { name: "โรงทาน", baseCost: 960, baseRate: 16.875, klass: "wholesome", creditRate: 0.3, flavor: "ข้าวแกงฟรี บุญไม่ฟรี" },
+  { name: "ผ้าป่า-กฐินสามัคคี", baseCost: 3_840, baseRate: 84.375, klass: "neutral", creditRate: 0, flavor: "สามัคคีคือพลัง (ของยอดบริจาค)" },
+  { name: "เสาไฟพญานาค", baseCost: 15_360, baseRate: 421.875, klass: "neutral", creditRate: 0, flavor: "ยิ่งเกล็ดละเอียด บุญยิ่งแรง" },
+  { name: "วัดออนไลน์ สแกน QR", baseCost: 61_440, baseRate: 2_109.375, klass: "neutral", creditRate: 0, flavor: "ทำบุญได้ทุกที่ ยกเว้นที่วัด" },
+  { name: "บุญ Delivery", baseCost: 1.536e6, baseRate: 42_187.5, klass: "neutral", creditRate: 0, flavor: "สังฆทานถึงวัดใน 15 นาที ไม่ทันรับบุญคืนฟรี" },
+  { name: "BunCoin Mining Rig", baseCost: 6.144e6, baseRate: 210_937.5, klass: "monetize", creditRate: -0.5, flavor: "proof-of-merit consensus" },
+  { name: "ดาวเทียมกระจายบุญ THEOS-บุญ", baseCost: 2.4576e7, baseRate: 1_054_687.5, klass: "monetize", creditRate: -0.6, flavor: "ครอบคลุมทุกพื้นที่ ไม่มีจุดอับบุญ" },
+  { name: "ประตูมิติดาวดึงส์", baseCost: 9.8304e7, baseRate: 5_273_437.5, klass: "monetize", creditRate: -0.7, flavor: "ฝากบุญตรงถึงสวรรค์ ไม่ผ่านตัวกลาง" },
+  { name: "NFT พระเครื่อง", baseCost: 3.93216e8, baseRate: 2.636719e7, klass: "monetize", creditRate: -0.8, flavor: "ของแท้ตรวจสอบได้บนบล็อกเชน (ห้ามถาม gas fee)" },
+  { name: "บริษัทบุญมหาชน (IPO)", baseCost: 1.572864e9, baseRate: 1.318359e8, klass: "monetize", creditRate: -0.9, flavor: "บุญเข้าตลาดหลักทรัพย์แล้ว ราคาพุ่งตามข่าว" },
+  { name: "เมตาเวิร์สวัด", baseCost: 6.291456e9, baseRate: 6.591797e8, klass: "monetize", creditRate: -1.0, flavor: "ทำบุญใน VR ไม่ต้องออกจากบ้าน (ขายที่ดินดิจิทัลรอบอุโบสถ)" },
 ];
 
 export const CLICK_TIERS: ClickTier[] = [
@@ -83,6 +88,9 @@ const MILESTONE_NAMES: [string, string, string][] = [
   ["การ์ดจอรุ่นศรัทธา", "halving ไม่กระทบสายบุญ", "staking บุญ APY 108%"],
   ["จานรับสัญญาณบุญ", "วงโคจรค้างฟ้าเหนือวัด", "ถ่ายทอดธรรมะ 4K"],
   ["ประตูบานที่สอง", "ทางด่วนพิเศษชั้นดาวดึงส์", "วีซ่าถาวรดาวดึงส์"],
+  ["mint รุ่นพิเศษ", "floor price ไม่มีวันตก", "airdrop บุญให้ holder"],
+  ["ปันผลบุญรายไตรมาส", "เข้า SET100 สายบุญ", "แตกพาร์เพิ่มสภาพคล่องบุญ"],
+  ["ที่ดินติดอุโบสถราคาพุ่ง", "avatar ห่มจีวร skin", "งานกฐินข้ามเซิร์ฟเวอร์"],
 ];
 const MILESTONE_COUNTS = [10, 25, 50] as const;
 

@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, EVENTS, ACHIEVEMENTS, TUNING } from "../src/lib/data";
 
 describe("data integrity", () => {
-  it("has 11 producers with ascending costs and rates", () => {
-    expect(PRODUCERS).toHaveLength(11);
-    for (let i = 1; i < 11; i++) {
+  it("has 14 producers with ascending costs and rates", () => {
+    expect(PRODUCERS).toHaveLength(14);
+    for (let i = 1; i < 14; i++) {
       expect(PRODUCERS[i]!.baseCost).toBeGreaterThan(PRODUCERS[i - 1]!.baseCost);
       expect(PRODUCERS[i]!.baseRate).toBeGreaterThan(PRODUCERS[i - 1]!.baseRate);
     }
@@ -14,10 +14,10 @@ describe("data integrity", () => {
     expect(CLICK_TIERS[0]!.cost).toBe(0);
     for (let i = 1; i < 5; i++) expect(CLICK_TIERS[i]!.cost).toBeGreaterThan(CLICK_TIERS[i - 1]!.cost);
   });
-  it("has 33 producer-milestone upgrades (3 per producer at 10/25/50) + 6 amulets", () => {
+  it("has 42 producer-milestone upgrades (3 per producer at 10/25/50) + 6 amulets", () => {
     const milestones = UPGRADES.filter(u => u.requires);
-    expect(milestones).toHaveLength(33);
-    for (let p = 0; p < 11; p++) {
+    expect(milestones).toHaveLength(42);
+    for (let p = 0; p < 14; p++) {
       const counts = milestones.filter(u => u.requires!.producer === p).map(u => u.requires!.count).sort((a, b) => a - b);
       expect(counts).toEqual([10, 25, 50]);
     }
@@ -35,5 +35,25 @@ describe("data integrity", () => {
   it("guardrail: no forbidden symbols in any copy", () => {
     const all = JSON.stringify({ PRODUCERS, CLICK_TIERS, UPGRADES, EVENTS, ACHIEVEMENTS });
     expect(all).not.toMatch(/ครุฑ|กินรี/);
+  });
+
+  it("producer curve is exponential with no value cliff", () => {
+    expect(PRODUCERS).toHaveLength(14);
+    for (let i = 1; i < PRODUCERS.length; i++) {
+      const costRatio = PRODUCERS[i]!.baseCost / PRODUCERS[i - 1]!.baseCost;
+      const rateRatio = PRODUCERS[i]!.baseRate / PRODUCERS[i - 1]!.baseRate;
+      expect(costRatio).toBeGreaterThanOrEqual(3.5);   // ~×4, never the old ×1.4 cliff
+      expect(rateRatio).toBeGreaterThanOrEqual(4.5);   // ~×5
+    }
+  });
+
+  it("producers are classed and creditRate signs match class", () => {
+    PRODUCERS.forEach((p, i) => {
+      expect(["wholesome", "neutral", "monetize"]).toContain(p.klass);
+      if (p.klass === "wholesome") expect(p.creditRate).toBeGreaterThan(0);
+      if (p.klass === "monetize") expect(p.creditRate).toBeLessThan(0);
+      if (i < 4) expect(p.klass).toBe("wholesome");
+      if (i >= 8) expect(p.klass).toBe("monetize");
+    });
   });
 });

@@ -27,10 +27,10 @@ describe("save round-trip", () => {
     const s = newGame(0); s.upgrades.push("a-ring");
     const raw = serialize(s)
       .replace('"a-ring"', '"a-ring","fake-id"')
-      .replace('"producers":[0,0,0,0,0,0,0,0,0,0,0]', '"producers":[1,2]');
+      .replace('"producers":[0,0,0,0,0,0,0,0,0,0,0,0,0,0]', '"producers":[1,2]');
     const back = deserialize(raw, 0);
     expect(back.upgrades).toEqual(["a-ring"]);
-    expect(back.producers).toHaveLength(11);
+    expect(back.producers).toHaveLength(14);
     expect(back.producers[0]).toBe(1);
   });
   it("dedupes repeated valid ids (multiplier-stacking exploit)", () => {
