@@ -75,7 +75,7 @@ describe("data integrity", () => {
     expect(TUNING.creditGateFloor).toBe(500);
     expect(TUNING.loanSiphon).toBeCloseTo(0.25);
     expect(TUNING.adCooldownSec).toBe(300);
-    expect(TUNING.nirvanaBarami).toBe(10_000);
+    expect(TUNING.nirvanaBarami).toBe(7_000_000_000);
   });
 
   it("ad copy exists and stays generic (no real brands)", () => {

@@ -194,14 +194,14 @@ describe("prestige", () => {
     s.barami = 2500;
     expect(rebirthTier(s).name).toBe("พรหม");
     expect(canNirvana(s)).toBe(false);
-    s.barami = 10_000;
+    s.barami = TUNING.nirvanaBarami;
     expect(canNirvana(s)).toBe(true);
     nirvana(s);
     expect(s.completed).toBe(true);
-    expect(s.barami).toBe(10_000); // nothing destroyed
+    expect(s.barami).toBe(TUNING.nirvanaBarami); // nothing destroyed
     reenter(s);
     expect(s.completed).toBe(false);
-    expect(s.barami).toBe(10_000);
+    expect(s.barami).toBe(TUNING.nirvanaBarami);
   });
   it("creditBonus is 0.7 at 300, 1.0 at 650, 1.5 at 900", () => {
     expect(creditBonus(300)).toBeCloseTo(0.7);

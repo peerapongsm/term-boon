@@ -66,9 +66,9 @@ export const PRODUCERS: Producer[] = [
   { name: "BunCoin Mining Rig", baseCost: 6.144e6, baseRate: 210_937.5, klass: "monetize", creditRate: -0.5, flavor: "proof-of-merit consensus" },
   { name: "ดาวเทียมกระจายบุญ THEOS-บุญ", baseCost: 2.4576e7, baseRate: 1_054_687.5, klass: "monetize", creditRate: -0.6, flavor: "ครอบคลุมทุกพื้นที่ ไม่มีจุดอับบุญ" },
   { name: "ประตูมิติดาวดึงส์", baseCost: 9.8304e7, baseRate: 5_273_437.5, klass: "monetize", creditRate: -0.7, flavor: "ฝากบุญตรงถึงสวรรค์ ไม่ผ่านตัวกลาง" },
-  { name: "NFT พระเครื่อง", baseCost: 3.93216e8, baseRate: 2.636719e7, klass: "monetize", creditRate: -0.8, flavor: "ของแท้ตรวจสอบได้บนบล็อกเชน (ห้ามถาม gas fee)" },
-  { name: "บริษัทบุญมหาชน (IPO)", baseCost: 1.572864e9, baseRate: 1.318359e8, klass: "monetize", creditRate: -0.9, flavor: "บุญเข้าตลาดหลักทรัพย์แล้ว ราคาพุ่งตามข่าว" },
-  { name: "เมตาเวิร์สวัด", baseCost: 6.291456e9, baseRate: 6.591797e8, klass: "monetize", creditRate: -1.0, flavor: "ทำบุญใน VR ไม่ต้องออกจากบ้าน (ขายที่ดินดิจิทัลรอบอุโบสถ)" },
+  { name: "NFT พระเครื่อง", baseCost: 3.5e8, baseRate: 2.636719e7, klass: "monetize", creditRate: -0.8, flavor: "ของแท้ตรวจสอบได้บนบล็อกเชน (ห้ามถาม gas fee)" },
+  { name: "บริษัทบุญมหาชน (IPO)", baseCost: 1.25e9, baseRate: 1.318359e8, klass: "monetize", creditRate: -0.9, flavor: "บุญเข้าตลาดหลักทรัพย์แล้ว ราคาพุ่งตามข่าว" },
+  { name: "เมตาเวิร์สวัด", baseCost: 4.4e9, baseRate: 6.591797e8, klass: "monetize", creditRate: -1.0, flavor: "ทำบุญใน VR ไม่ต้องออกจากบ้าน (ขายที่ดินดิจิทัลรอบอุโบสถ)" },
 ];
 
 export const CLICK_TIERS: ClickTier[] = [
@@ -180,7 +180,7 @@ export const TUNING = {
   costGrowth: 1.15,
   prestigeUnlockBoon: 1e8,
   baramiProdBonus: 0.05,
-  nirvanaBarami: 10_000,
+  nirvanaBarami: 7_000_000_000,
   offlineCapHours: 8,
   eventMinGapSec: 60,
   eventMaxGapSec: 180,
