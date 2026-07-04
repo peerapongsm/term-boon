@@ -234,8 +234,18 @@ function resetRun(s: GameState): void {
   s.loan = null; s.clickCombo = { count: 0, lastClickMs: 0 };
 }
 
+const DEVA_INDEX = REBIRTH_TIERS.findIndex(t => t.name === "เทวดา");
+
+export function prestigeBlockedByCredit(s: GameState): boolean {
+  if (!canPrestige(s)) return false;
+  const afterBarami = s.barami + baramiGain(s);
+  let reachedIdx = 0;
+  for (let i = 0; i < REBIRTH_TIERS.length; i++) if (afterBarami >= REBIRTH_TIERS[i]!.baramiFloor) reachedIdx = i;
+  return reachedIdx >= DEVA_INDEX && s.credit < TUNING.creditGateFloor;
+}
+
 export function prestige(s: GameState, now = Date.now()): void {
-  if (!canPrestige(s)) return;
+  if (!canPrestige(s) || prestigeBlockedByCredit(s)) return;
   s.barami += baramiGain(s); s.lives++; s.lastSeen = now;
   resetRun(s);
 }

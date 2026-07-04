@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan, prestigeBlockedByCredit } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -231,6 +231,19 @@ describe("prestige", () => {
     creditTick(s, 1);
     expect(s.credit).toBeLessThan(900);                          // decays toward low target
     expect(s.credit).toBeGreaterThanOrEqual(300);
+  });
+  it("blocks ascent into เทวดา when credit < 500", () => {
+    const s = newGame(0);
+    s.totalBoon = 1e8 * 40_000;      // huge gain → would cross into เทวดา (barami ≥ 200)
+    s.barami = 199; s.credit = 400;  // just below เทวดา floor, low credit
+    expect(prestigeBlockedByCredit(s)).toBe(true);
+    const baramiBefore = s.barami;
+    prestige(s, 0);
+    expect(s.barami).toBe(baramiBefore);       // no-op while blocked
+    s.credit = 550;
+    expect(prestigeBlockedByCredit(s)).toBe(false);
+    prestige(s, 0);
+    expect(s.barami).toBeGreaterThan(baramiBefore);
   });
 });
 
