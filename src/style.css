@@ -338,6 +338,10 @@ button {
 }
 .tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   border: none;
   border-radius: 999px;
   background: transparent;
@@ -347,6 +351,8 @@ button {
   color: var(--fg-muted);
   white-space: nowrap;
 }
+.tab-icon { font-size: 1.05em; line-height: 1; }
+.tab-label { line-height: 1; }
 .tab.active {
   color: #fff;
   font-weight: 700;
@@ -719,6 +725,13 @@ button.upgrade-row:not(.unaffordable):active {
     margin: 0 auto;
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
   }
+
+  /* ทำบุญ home tab is a mobile-only concept (Cookie-Clicker-style "return
+     to the big coin" nav item) — desktop always shows the coin, so it
+     never gets its own nav entry. */
+  .tab[data-panel="home"] {
+    display: none;
+  }
 }
 
 /* ---- desktop portal layout (web-banking-portal parody) ---- */
@@ -749,6 +762,7 @@ button.upgrade-row:not(.unaffordable):active {
   }
   .tab {
     flex: none;
+    justify-content: flex-start;
     text-align: left;
     padding: 0.85rem 1.25rem;
     font-size: 0.95rem;
@@ -793,6 +807,28 @@ button.upgrade-row:not(.unaffordable):active {
     border-left: 1px solid var(--surface-2);
     padding: 1.25rem;
   }
+}
+
+/* ---- mobile app-shell (Cookie Clicker mobile pattern) ----
+   Home tab (ทำบุญ) shows the big coin; the other 4 tabs each show their
+   panel full-screen with the coin hidden. Desktop never matches this
+   query, so it keeps the coin always visible + its existing 4-tab layout.
+   DOM order is balance -> click-area -> nav -> panels; flex `order` below
+   re-flows that into header (top) -> content (coin or active panel) ->
+   nav (bottom) without touching markup. */
+@media (max-width: 640px) {
+  .balance-card { order: 0; }
+  .news-ticker { order: 1; }
+  .event-banner { order: 1; }
+  .click-area { order: 2; display: none; }
+  .panel { order: 2; flex: 1; max-height: none; }
+  .tab-bar { order: 3; }
+
+  .wallet[data-view="home"] .click-area { display: flex; }
+
+  .tab { flex-direction: column; gap: 0.15rem; padding: 0.4rem 0.15rem; }
+  .tab-icon { font-size: 1.15rem; }
+  .tab-label { font-size: 0.62rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

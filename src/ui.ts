@@ -199,6 +199,10 @@ function switchTab(name: string): void {
   panelUpgrades.hidden = name !== "upgrades";
   panelCredit.hidden = name !== "credit";
   panelProfile.hidden = name !== "profile";
+  // mobile-only: drives coin-vs-panel visibility via CSS at max-width:640px
+  // (see .wallet[data-view=...] rules). Desktop never matches that query,
+  // so this attribute has no effect there.
+  appRoot.dataset.view = name;
 }
 
 // ---- confirm dialog ----
@@ -763,6 +767,10 @@ export function bindUI(s: GameState): void {
   // refresh mid-ending: completed persists across reload, so re-show the
   // ending screen immediately instead of the fade sequence.
   if (s.completed) showEndingNow(s);
+
+  // mobile lands on the big coin (home tab); desktop's default (services,
+  // set in index.html) is untouched since this only runs under the query.
+  if (matchMedia("(max-width: 640px)").matches) switchTab("home");
 
   buildTicker();
 }
