@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -166,5 +166,22 @@ describe("prestige", () => {
     reenter(s);
     expect(s.completed).toBe(false);
     expect(s.barami).toBe(10_000);
+  });
+  it("creditBonus is 0.7 at 300, 1.0 at 650, 1.5 at 900", () => {
+    expect(creditBonus(300)).toBeCloseTo(0.7);
+    expect(creditBonus(650)).toBeCloseTo(1.0);
+    expect(creditBonus(900)).toBeCloseTo(1.5);
+    expect(creditBonus(475)).toBeCloseTo(0.85, 1);   // midpoint of low half
+  });
+  it("baramiGain scales with tier momentum and credit", () => {
+    const base = newGame(0);
+    base.totalBoon = 1e8 * 100;          // sqrt = 10
+    base.credit = 650;                   // bonus 1.0
+    base.barami = 0;                     // tier 0 → momentum 1.0
+    expect(baramiGain(base)).toBe(10);
+    base.barami = 200;                   // เทวดา = index 4 → momentum 1.4
+    expect(baramiGain(base)).toBe(14);
+    base.credit = 900;                   // bonus 1.5 → 10×1.4×1.5 = 21
+    expect(baramiGain(base)).toBe(21);
   });
 });

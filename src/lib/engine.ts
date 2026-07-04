@@ -144,8 +144,24 @@ export function nextEventDelayMs(rand: () => number = Math.random): number {
 }
 
 export const canPrestige = (s: GameState) => s.totalBoon >= TUNING.prestigeUnlockBoon;
+
+export function creditBonus(credit: number): number {
+  if (credit <= 650) return 0.7 + (credit - 300) / (650 - 300) * (1.0 - 0.7);
+  return 1.0 + (credit - 650) / (900 - 650) * (1.5 - 1.0);
+}
+
+export function rebirthTierIndex(s: GameState): number {
+  let idx = 0;
+  for (let i = 0; i < REBIRTH_TIERS.length; i++) if (s.barami >= REBIRTH_TIERS[i]!.baramiFloor) idx = i;
+  return idx;
+}
+
 export const baramiGain = (s: GameState) =>
-  Math.floor(Math.sqrt(s.totalBoon / TUNING.prestigeUnlockBoon));
+  Math.floor(
+    Math.sqrt(s.totalBoon / TUNING.prestigeUnlockBoon) *
+    (1 + TUNING.momentumPerTier * rebirthTierIndex(s)) *
+    creditBonus(s.credit),
+  );
 
 function resetRun(s: GameState): void {
   s.boon = 0; s.totalBoon = 0;
