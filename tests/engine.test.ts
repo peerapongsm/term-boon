@@ -270,6 +270,38 @@ describe("prestige", () => {
   });
 });
 
+describe("credit gate regression (humanly clearable + decay preserved)", () => {
+  // Endgame monetize-heavy build pins the credit target to the low floor (300),
+  // yet a deliberate human-rate click burst must still be able to clear the
+  // เทวดา gate (creditGateFloor = 500). Measured: ~8s / 64 clicks at 8 cps.
+  it("8 clicks/sec lifts a pinned-low credit from 300 past the 500 gate within a short burst", () => {
+    const s = newGame(0);
+    s.producers[13] = 200;                          // pure monetize → target clamps to floor
+    s.credit = 300;
+    expect(creditTarget(s)).toBe(TUNING.creditMin); // 300, pinned at the low floor
+    let now = 0;
+    let sec = 0;
+    while (s.credit < TUNING.creditGateFloor && sec < 60) {
+      for (let c = 0; c < 8; c++) { click(s, now); now += 125; }
+      creditTick(s, 1, now);                        // real decay runs each simulated second
+      sec++;
+    }
+    expect(s.credit).toBeGreaterThanOrEqual(TUNING.creditGateFloor); // gate cleared by a human
+    expect(sec).toBeLessThanOrEqual(30);                            // and within a short active beat
+  });
+
+  it("with no clicking, credit decays back below the gate toward the low target (tension preserved)", () => {
+    const s = newGame(0);
+    s.producers[13] = 200;
+    s.credit = 700;
+    s.clickCombo.lastClickMs = 0;                   // not actively clicking
+    let now = 10_000_000;                           // far past the combo window
+    for (let sec = 0; sec < 30; sec++) { creditTick(s, 1, now); now += 1000; }
+    expect(s.credit).toBeLessThanOrEqual(creditTarget(s, now) + 1);
+    expect(s.credit).toBeLessThan(TUNING.creditGateFloor); // fell below 500 — must be re-earned
+  });
+});
+
 describe("loan", () => {
   it("takeLoan gives a lump, drops credit, and is repaid via income siphon", () => {
     const s = newGame(0); s.producers[0] = 1000; s.credit = 700;

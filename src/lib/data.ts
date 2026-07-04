@@ -198,7 +198,7 @@ export const TUNING = {
   creditDriftPerSec: 20,
   creditShareMonetize: 400,           // subtract weight
   creditShareWholesome: 200,          // add weight
-  clickCreditTrickle: 0.5,            // per click, ×combo
+  clickCreditTrickle: 2.0,            // per click, ×combo
   auditImmuneCap: 0.05,               // ใบเซอร์บุญแท้ caps tax here
   // ---- momentum ----
   momentumPerTier: 0.1,

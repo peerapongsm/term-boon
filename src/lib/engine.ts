@@ -212,8 +212,10 @@ export function creditTarget(s: GameState, now = Date.now()): number {
 export function creditTick(s: GameState, dtSec: number, now = Date.now()): void {
   const target = creditTarget(s, now);
   const step = TUNING.creditDriftPerSec * dtSec;
+  const activelyClicking = now - s.clickCombo.lastClickMs < TUNING.comboWindowMs;
   if (s.credit < target) s.credit = Math.min(target, s.credit + step);
-  else if (s.credit > target) s.credit = Math.max(target, s.credit - step);
+  else if (s.credit > target && !activelyClicking) s.credit = Math.max(target, s.credit - step);
+  // while actively clicking and above target: hold — the per-click trickle raises credit
   s.credit = Math.min(Math.max(s.credit, TUNING.creditMin), TUNING.creditMax);
 }
 

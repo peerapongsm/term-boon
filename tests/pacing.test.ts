@@ -41,6 +41,7 @@ function prestigeWhenWorth(s: GameState, now: number): void {
   while (prestigeBlockedByCredit(s) && guard++ < 600) {
     for (let c = 0; c < 20; c++) click(s, now);
     if (adReady(s, now)) watchAd(s, "credit", now);
+    creditTick(s, 1, now);   // exercise real decay while spiking credit
     now += 1000;
   }
   prestige(s, now);
