@@ -170,6 +170,9 @@ export function triggerEvent(s: GameState, eventId: string, now: number): void {
   const ev = EVENTS.find(e => e.id === eventId); if (!ev) return;
   const dur = ev.durationSec * 1000 * upgradeMults(s).buffDur;
   s.buffs.push({ eventId, endsAt: now + dur });
+  if (ev.effect.creditDelta) {
+    s.credit = Math.min(TUNING.creditMax, Math.max(TUNING.creditMin, s.credit + ev.effect.creditDelta));
+  }
 }
 
 export function pruneBuffs(s: GameState, now: number): void {

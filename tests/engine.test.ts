@@ -119,6 +119,24 @@ describe("events", () => {
     triggerEvent(s, "kathin", 0);
     expect(boonPerClick(s, 10_000)).toBeGreaterThan(1); // 7s×1.5=10.5s still active
   });
+  it("triggerEvent applies creditDelta as an instant clamped credit change", () => {
+    const s = newGame(0);
+    s.credit = 650;
+    triggerEvent(s, "tour", 0); // creditDelta: -20
+    expect(s.credit).toBe(630);
+  });
+  it("triggerEvent with no creditDelta leaves credit unchanged", () => {
+    const s = newGame(0);
+    s.credit = 650;
+    triggerEvent(s, "kathin", 0); // no creditDelta
+    expect(s.credit).toBe(650);
+  });
+  it("triggerEvent clamps creditDelta at creditMin", () => {
+    const s = newGame(0);
+    s.credit = 310;
+    triggerEvent(s, "tour", 0); // -20 would go to 290, below creditMin (300)
+    expect(s.credit).toBe(TUNING.creditMin);
+  });
   it("nextEventDelayMs stays in tuned window", () => {
     for (const r of [0, 0.5, 0.999]) {
       const ms = nextEventDelayMs(() => r);

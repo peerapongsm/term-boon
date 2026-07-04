@@ -27,8 +27,8 @@ describe("data integrity", () => {
   it("has 7 rebirth tiers ascending from 0", () => {
     expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 25, 2_000_000, 100_000_000, 2_000_000_000, 5_000_000_000]);
   });
-  it("has 7 events and 12 achievements incl. 2 hidden", () => {
-    expect(EVENTS).toHaveLength(7);
+  it("has 9 events and 12 achievements incl. 2 hidden", () => {
+    expect(EVENTS).toHaveLength(9);
     expect(ACHIEVEMENTS).toHaveLength(12);
     expect(ACHIEVEMENTS.filter(a => a.hidden)).toHaveLength(2);
   });
