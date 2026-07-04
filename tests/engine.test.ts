@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -141,6 +141,22 @@ describe("audit tax", () => {
     const gained = tick(s, 1, 0);
     const gross = 100 * 0.1;                                       // baseRate
     expect(gained).toBeCloseTo(gross * 0.75, 5);
+  });
+});
+
+describe("click combo", () => {
+  it("combo ramps within window, caps at ×3, resets after window", () => {
+    const s = newGame(0);
+    for (let i = 0; i < 200; i++) click(s, i * 100);      // 100ms apart, within 1500ms window
+    expect(comboMult(s)).toBeCloseTo(3, 1);                // capped
+    click(s, 999999);                                      // long gap → reset
+    expect(s.clickCombo.count).toBe(1);
+  });
+
+  it("clicking raises credit via trickle", () => {
+    const s = newGame(0); s.credit = 650;
+    click(s, 0);
+    expect(s.credit).toBeGreaterThan(650);
   });
 });
 

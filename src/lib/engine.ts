@@ -69,9 +69,12 @@ function activeBuffMults(s: GameState, now: number) {
 
 const baramiMult = (s: GameState) => 1 + TUNING.baramiProdBonus * s.barami;
 
+export const comboMult = (s: GameState) =>
+  1 + Math.min(Math.max(0, s.clickCombo.count - 1) * TUNING.comboStep, TUNING.comboCap);
+
 export function boonPerClick(s: GameState, now = Date.now()): number {
   const m = upgradeMults(s); const b = activeBuffMults(s, now);
-  return CLICK_TIERS[s.clickTier]!.baseClick * m.clickMult * baramiMult(s) * b.click * b.all;
+  return CLICK_TIERS[s.clickTier]!.baseClick * m.clickMult * baramiMult(s) * b.click * b.all * comboMult(s);
 }
 
 export function boonPerSecond(s: GameState, now = Date.now()): number {
@@ -100,9 +103,15 @@ export function auditTaxRate(s: GameState): number {
 }
 
 export function click(s: GameState, now = Date.now()): number {
+  // update combo BEFORE computing click value so the combo mult applies to this click
+  if (now - s.clickCombo.lastClickMs > TUNING.comboWindowMs) s.clickCombo.count = 1;
+  else s.clickCombo.count++;
+  s.clickCombo.lastClickMs = now;
   s.stats.clicks++;
   const tax = Math.max(activeBuffMults(s, now).taxRate, auditTaxRate(s));
-  return gain(s, boonPerClick(s, now), tax);
+  const gained = gain(s, boonPerClick(s, now), tax);
+  s.credit = Math.min(TUNING.creditMax, s.credit + TUNING.clickCreditTrickle * comboMult(s));
+  return gained;
 }
 
 export function tick(s: GameState, dtSec: number, now = Date.now()): number {
