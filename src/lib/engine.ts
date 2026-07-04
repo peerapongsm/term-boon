@@ -260,4 +260,23 @@ export const canNirvana = (s: GameState) =>
   rebirthTier(s) === REBIRTH_TIERS[REBIRTH_TIERS.length - 1] && s.barami >= TUNING.nirvanaBarami;
 
 export function nirvana(s: GameState): void { if (canNirvana(s)) s.completed = true; }
-export function reenter(s: GameState): void { s.completed = false; resetRun(s); }
+export function reenter(s: GameState): void { s.completed = false; s.samsara++; resetRun(s); }
+
+export function adReady(s: GameState, now = Date.now()): boolean {
+  return s.lives >= 2 && (s.lastAdMs === 0 || now - s.lastAdMs >= TUNING.adCooldownSec * 1000);
+}
+
+const AD_LUMP_FLOOR = 1000;   // avoids a worthless early lump
+
+export function watchAd(s: GameState, reward: "buff" | "lump" | "credit", now = Date.now()): boolean {
+  if (!adReady(s, now)) return false;
+  s.lastAdMs = now;
+  if (reward === "buff") triggerEvent(s, "ad-x2", now);
+  else if (reward === "lump") {
+    const lump = Math.max(TUNING.adLumpSeconds * boonPerSecond(s, now), AD_LUMP_FLOOR);
+    s.boon += lump; s.totalBoon += lump; s.allTimeBoon += lump;
+  } else {
+    s.credit = Math.min(TUNING.creditMax, s.credit + TUNING.adCreditReward);
+  }
+  return true;
+}

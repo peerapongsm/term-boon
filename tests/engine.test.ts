@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan, prestigeBlockedByCredit } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan, prestigeBlockedByCredit, adReady, watchAd } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -265,5 +265,26 @@ describe("loan", () => {
     const s = newGame(0); s.producers[0] = 1000; s.totalBoon = 1e8; takeLoan(s, 0);
     prestige(s, 0);
     expect(s.loan).toBeNull();
+  });
+
+  it("ad unlocks after first prestige and respects cooldown", () => {
+    const s = newGame(0); s.producers[0] = 100;
+    expect(adReady(s, 1000)).toBe(false);          // lives === 1, locked
+    s.lives = 2;
+    expect(adReady(s, 1000)).toBe(true);
+    expect(watchAd(s, "credit", 1000)).toBe(true);
+    expect(s.credit).toBeCloseTo(670);             // +20
+    expect(adReady(s, 1000)).toBe(false);          // cooldown
+    expect(adReady(s, 1000 + 300_000)).toBe(true); // 5 min later
+  });
+
+  it("lump reward scales with bps and has a floor; reenter counts samsara", () => {
+    const s = newGame(0); s.lives = 2; s.producers[0] = 1000;
+    const bps = boonPerSecond(s, 0); const before = s.boon;
+    watchAd(s, "lump", 0);
+    expect(s.boon - before).toBeCloseTo(Math.max(120 * bps, 1000), 3);
+    s.completed = true;
+    reenter(s);
+    expect(s.samsara).toBe(1);
   });
 });
