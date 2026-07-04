@@ -127,11 +127,11 @@ export const UPGRADES: Upgrade[] = [...milestoneUpgrades, ...amulets];
 export const REBIRTH_TIERS: RebirthTier[] = [
   { name: "หมาวัด", baramiFloor: 0 },
   { name: "มนุษย์เดินดิน", baramiFloor: 1 },
-  { name: "เศรษฐีใจบุญ", baramiFloor: 20 },
-  { name: "เทพบุตร-เทพธิดา", baramiFloor: 80 },
-  { name: "เทวดา", baramiFloor: 200 },
-  { name: "พรหม", baramiFloor: 1200 },
-  { name: "อรหันต์", baramiFloor: 6000 },
+  { name: "เศรษฐีใจบุญ", baramiFloor: 25 },
+  { name: "เทพบุตร-เทพธิดา", baramiFloor: 2_000_000 },
+  { name: "เทวดา", baramiFloor: 100_000_000 },
+  { name: "พรหม", baramiFloor: 2_000_000_000 },
+  { name: "อรหันต์", baramiFloor: 5_000_000_000 },
 ];
 
 export const EVENTS: GameEvent[] = [
@@ -180,7 +180,7 @@ export const TUNING = {
   costGrowth: 1.15,
   prestigeUnlockBoon: 1e8,
   baramiProdBonus: 0.05,
-  nirvanaBarami: 7_000_000_000,
+  nirvanaBarami: 9_000_000_000,
   offlineCapHours: 8,
   eventMinGapSec: 60,
   eventMaxGapSec: 180,

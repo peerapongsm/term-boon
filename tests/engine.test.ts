@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan, prestigeBlockedByCredit, adReady, watchAd } from "../src/lib/engine";
-import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
+import { PRODUCERS, TUNING, UPGRADES, REBIRTH_TIERS } from "../src/lib/data";
+
+const floorOf = (name: string) => REBIRTH_TIERS.find(t => t.name === name)!.baramiFloor;
 
 describe("core engine", () => {
   it("new game starts at zero, click gives 1 boon", () => {
@@ -189,11 +191,13 @@ describe("prestige", () => {
   it("rebirth ladder and nirvana gate", () => {
     const s = newGame(0);
     expect(rebirthTier(s).name).toBe("หมาวัด");
-    s.barami = 250;
+    s.barami = floorOf("เทวดา") - 1;                 // just below เทวดา
+    expect(rebirthTier(s).name).toBe("เทพบุตร-เทพธิดา");
+    s.barami = floorOf("เทวดา");
     expect(rebirthTier(s).name).toBe("เทวดา");
-    s.barami = 2500;
+    s.barami = floorOf("พรหม");
     expect(rebirthTier(s).name).toBe("พรหม");
-    expect(canNirvana(s)).toBe(false);
+    expect(canNirvana(s)).toBe(false);              // พรหม is below top tier → no nirvana
     s.barami = TUNING.nirvanaBarami;
     expect(canNirvana(s)).toBe(true);
     nirvana(s);
@@ -215,7 +219,7 @@ describe("prestige", () => {
     base.credit = 650;                   // bonus 1.0
     base.barami = 0;                     // tier 0 → momentum 1.0
     expect(baramiGain(base)).toBe(10);
-    base.barami = 200;                   // เทวดา = index 4 → momentum 1.4
+    base.barami = floorOf("เทวดา");      // เทวดา = index 4 → momentum 1.4
     expect(baramiGain(base)).toBe(14);
     base.credit = 900;                   // bonus 1.5 → 10×1.4×1.5 = 21
     expect(baramiGain(base)).toBe(21);
@@ -234,8 +238,9 @@ describe("prestige", () => {
   });
   it("blocks ascent into เทวดา when credit < 500", () => {
     const s = newGame(0);
-    s.totalBoon = 1e8 * 40_000;      // huge gain → would cross into เทวดา (barami ≥ 200)
-    s.barami = 199; s.credit = 400;  // just below เทวดา floor, low credit
+    s.totalBoon = 1e8 * 100;                 // small gain (~10) that still crosses the floor
+    s.barami = floorOf("เทวดา") - 10;        // just below เทวดา floor
+    s.credit = 400;                          // low credit
     expect(prestigeBlockedByCredit(s)).toBe(true);
     const baramiBefore = s.barami;
     prestige(s, 0);

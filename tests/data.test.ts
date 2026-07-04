@@ -25,7 +25,7 @@ describe("data integrity", () => {
     expect(new Set(UPGRADES.map(u => u.id)).size).toBe(UPGRADES.length);
   });
   it("has 7 rebirth tiers ascending from 0", () => {
-    expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 20, 80, 200, 1200, 6000]);
+    expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 25, 2_000_000, 100_000_000, 2_000_000_000, 5_000_000_000]);
   });
   it("has 7 events and 12 achievements incl. 2 hidden", () => {
     expect(EVENTS).toHaveLength(7);
@@ -66,7 +66,7 @@ describe("data integrity", () => {
     expect(REBIRTH_TIERS.map(t => t.name)).toEqual([
       "หมาวัด", "มนุษย์เดินดิน", "เศรษฐีใจบุญ", "เทพบุตร-เทพธิดา", "เทวดา", "พรหม", "อรหันต์",
     ]);
-    expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 20, 80, 200, 1200, 6000]);
+    expect(REBIRTH_TIERS.map(t => t.baramiFloor)).toEqual([0, 1, 25, 2_000_000, 100_000_000, 2_000_000_000, 5_000_000_000]);
   });
 
   it("TUNING has the new update constants", () => {
@@ -75,7 +75,7 @@ describe("data integrity", () => {
     expect(TUNING.creditGateFloor).toBe(500);
     expect(TUNING.loanSiphon).toBeCloseTo(0.25);
     expect(TUNING.adCooldownSec).toBe(300);
-    expect(TUNING.nirvanaBarami).toBe(7_000_000_000);
+    expect(TUNING.nirvanaBarami).toBe(9_000_000_000);
   });
 
   it("ad copy exists and stays generic (no real brands)", () => {
