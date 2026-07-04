@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, EVENTS, ACHIEVEMENTS, TUNING } from "../src/lib/data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, EVENTS, ACHIEVEMENTS, TUNING, AD_COPY } from "../src/lib/data";
 
 describe("data integrity", () => {
   it("has 14 producers with ascending costs and rates", () => {
@@ -71,5 +71,10 @@ describe("data integrity", () => {
     expect(TUNING.loanSiphon).toBeCloseTo(0.25);
     expect(TUNING.adCooldownSec).toBe(300);
     expect(TUNING.nirvanaBarami).toBe(10_000);
+  });
+
+  it("ad copy exists and stays generic (no real brands)", () => {
+    expect(AD_COPY.length).toBeGreaterThanOrEqual(3);
+    AD_COPY.forEach(line => expect(line.length).toBeGreaterThan(4));
   });
 });

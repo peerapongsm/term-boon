@@ -809,3 +809,13 @@ button.upgrade-row:not(.unaffordable):active {
 .credit-fill[data-band="bad"] { background: #c0392b; }
 .credit-gate-hint { margin: 8px 0; padding: 8px 12px; border-radius: 8px;
   background: #fdecea; color: #a5281b; font-size: 0.85rem; border: 1.5px solid #e6b0aa; }
+
+.ad-dialog { border: none; border-radius: 12px; padding: 0; max-width: 340px; }
+.ad-dialog::backdrop { background: rgba(0,0,0,0.6); }
+.ad-inner { padding: 16px; text-align: center; }
+.ad-sponsor { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+.ad-banner { font-family: "Chonburi", serif; font-size: 1.15rem; margin: 12px 0; color: #b8862c; }
+.ad-fineprint { font-size: 0.65rem; color: #aaa; margin-bottom: 12px; }
+.ad-controls { display: flex; flex-direction: column; gap: 6px; }
+.ad-reward { padding: 8px; border-radius: 8px; border: none; background: #b8862c; color: #fff; font-weight: 600; }
+.ad-close { padding: 6px; border-radius: 8px; border: 1px solid #ccc; background: #f4f4f4; }

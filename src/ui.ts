@@ -2,9 +2,9 @@ import {
   GameState, click, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
   canNirvana, nirvana, reenter, creditTarget, auditTaxRate,
-  prestigeBlockedByCredit, rebirthTierIndex,
+  prestigeBlockedByCredit, rebirthTierIndex, adReady, watchAd,
 } from "./lib/engine";
-import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent } from "./lib/data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent, AD_COPY } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
 import { initAudio, playSfx, setMuted, isMuted } from "./lib/audio";
 import { save } from "./lib/save";
@@ -40,6 +40,8 @@ const achievementsList = $<HTMLElement>("achievements-list");
 const statsBlock = $<HTMLElement>("stats-block");
 const prestigeBtn = $<HTMLButtonElement>("prestige-btn");
 const nirvanaBtn = $<HTMLButtonElement>("nirvana-btn");
+const watchAdBtn = $<HTMLButtonElement>("watch-ad-btn");
+const adDialog = $<HTMLDialogElement>("ad-dialog");
 const toastLayer = $<HTMLElement>("toast-layer");
 const confirmDialog = $<HTMLDialogElement>("confirm-dialog");
 const endingScreen = $<HTMLElement>("ending-screen");
@@ -226,6 +228,46 @@ function openConfirm(
     if (confirmDialog.returnValue === "confirm") onConfirm();
     confirmDialog.removeEventListener("close", handler);
   });
+}
+
+// ---- fake rewarded ad (โฆษณาบุญ) ----
+
+function openAd(s: GameState): void {
+  const copy = AD_COPY[Math.floor(Math.random() * AD_COPY.length)]!;
+  let left = reducedMotion() ? 0 : 15;
+  const render = (canSkip: boolean) => {
+    adDialog.innerHTML = `
+      <div class="ad-inner">
+        <div class="ad-sponsor">ผู้สนับสนุน · บุญWallet Ads</div>
+        <div class="ad-banner">${copy}</div>
+        <div class="ad-fineprint">*เงื่อนไขเป็นไปตามที่กรรมกำหนด</div>
+        <div class="ad-controls">
+          <span class="ad-count">${canSkip ? "" : `ข้ามได้ใน ${left} วิ`}</span>
+          ${canSkip ? `
+            <button class="ad-reward" data-r="buff">บุญคูณ ×2 (90 วิ)</button>
+            <button class="ad-reward" data-r="lump">บุญด่วนก้อนโต</button>
+            <button class="ad-reward" data-r="credit">เครดิต +20</button>
+            <button class="ad-close" value="cancel">✕ ปิด</button>` : ""}
+        </div>
+      </div>`;
+  };
+  initAudio(); playSfx("jingle");
+  render(left <= 0);
+  if (!adDialog.open) adDialog.showModal();
+  const timer = setInterval(() => {
+    left--;
+    if (left <= 0) { clearInterval(timer); render(true); } else render(false);
+  }, 1000);
+  adDialog.onclick = (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".ad-reward");
+    if (btn?.dataset.r) {
+      watchAd(s, btn.dataset.r as "buff" | "lump" | "credit");
+      save(s);
+      clearInterval(timer); adDialog.close(); adDialog.onclick = null;
+    } else if ((e.target as HTMLElement).classList.contains("ad-close")) {
+      clearInterval(timer); adDialog.close(); adDialog.onclick = null;
+    }
+  };
 }
 
 // ---- render: balance / rebirth ----
@@ -481,6 +523,7 @@ export function renderAll(s: GameState, now: number): void {
   renderAchievements(s);
   renderStats(s);
   checkUnitMilestone(s);
+  watchAdBtn.hidden = !adReady(s, now);
 }
 
 export function bindUI(s: GameState): void {
@@ -549,6 +592,8 @@ export function bindUI(s: GameState): void {
       },
     );
   });
+  watchAdBtn.addEventListener("click", () => { if (adReady(s)) openAd(s); });
+
   nirvanaBtn.addEventListener("click", () => {
     openConfirm(
       "นิพพาน",

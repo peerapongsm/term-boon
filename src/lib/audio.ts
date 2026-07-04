@@ -48,7 +48,7 @@ function noise(dur: number, gain = 0.08, delay = 0) {
 }
 
 const RECIPES: Record<
-  "coin" | "rice" | "thud" | "shimmer" | "beep" | "bell",
+  "coin" | "rice" | "thud" | "shimmer" | "beep" | "bell" | "jingle",
   () => void
 > = {
   coin: () => {
@@ -68,6 +68,11 @@ const RECIPES: Record<
   bell: () => {
     tone(660, 1.2, "sine", 0.2);
     tone(1320, 0.9, "sine", 0.08);
+  },
+  jingle: () => {
+    tone(523, 0.12, "square", 0.08);
+    tone(659, 0.12, "square", 0.08, 0.12);
+    tone(784, 0.2, "square", 0.08, 0.24);
   },
 };
 

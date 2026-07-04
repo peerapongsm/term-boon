@@ -157,6 +157,14 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "true-merit", name: "บุญที่แท้", desc: "???", hidden: true },
 ];
 
+export const AD_COPY: string[] = [
+  "สินเชื่อบุญด่วน อนุมัติใน 5 นาที ไม่เช็คเครดิต*",
+  "ลงทุน BunCoin วันนี้ บุญโต 108% ต่อปี**",
+  "แอปสั่งสังฆทาน ลด 50% เฉพาะวันนี้",
+  "คอร์สรวยบุญ 3 วันเปลี่ยนชีวิต สมัครก่อนเต็ม",
+  "เครื่องรางเรียกบุญ ของแท้ 100% มีใบเซอร์",
+];
+
 export const TUNING = {
   costGrowth: 1.15,
   prestigeUnlockBoon: 1e8,
