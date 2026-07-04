@@ -4,7 +4,7 @@ import {
   canNirvana, nirvana, reenter, creditTarget, auditTaxRate,
   prestigeBlockedByCredit, rebirthTierIndex, adReady, watchAd, takeLoan,
 } from "./lib/engine";
-import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent, AD_COPY } from "./lib/data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent, AD_COPY, NEWS_ECHO } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
 import { initAudio, playSfx, setMuted, isMuted } from "./lib/audio";
 import { save } from "./lib/save";
@@ -543,6 +543,12 @@ export function renderAll(s: GameState, now: number): void {
   }
 }
 
+function buildTicker(): void {
+  const track = $<HTMLElement>("news-track");
+  const items = [...NEWS_ECHO, ...NEWS_ECHO];       // duplicate for seamless loop
+  track.innerHTML = items.map(h => `<span class="news-item">${h}</span>`).join("");
+}
+
 export function bindUI(s: GameState): void {
   clickable.addEventListener("click", () => {
     if (s.completed) return;
@@ -645,4 +651,6 @@ export function bindUI(s: GameState): void {
   // refresh mid-ending: completed persists across reload, so re-show the
   // ending screen immediately instead of the fade sequence.
   if (s.completed) showEndingNow(s);
+
+  buildTicker();
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, EVENTS, ACHIEVEMENTS, TUNING, AD_COPY } from "../src/lib/data";
+import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, EVENTS, ACHIEVEMENTS, TUNING, AD_COPY, NEWS_ECHO } from "../src/lib/data";
 
 describe("data integrity", () => {
   it("has 14 producers with ascending costs and rates", () => {
@@ -81,5 +81,9 @@ describe("data integrity", () => {
   it("ad copy exists and stays generic (no real brands)", () => {
     expect(AD_COPY.length).toBeGreaterThanOrEqual(3);
     AD_COPY.forEach(line => expect(line.length).toBeGreaterThan(4));
+  });
+
+  it("news-echo headlines exist", () => {
+    expect(NEWS_ECHO.length).toBeGreaterThanOrEqual(4);
   });
 });

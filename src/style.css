@@ -139,6 +139,16 @@ button {
   line-height: 1;
 }
 
+/* ---- news-echo ticker (satire, flavor only) ---- */
+
+.news-ticker { overflow: hidden; white-space: nowrap; background: rgba(0,0,0,0.06);
+  font-size: 0.75rem; padding: 4px 0; }
+.news-track { display: inline-block; animation: news-scroll 40s linear infinite; }
+.news-item { padding: 0 24px; color: #6b5b3e; }
+.news-item::before { content: "📰 "; }
+@keyframes news-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .news-track { animation: none; } }
+
 /* ---- event banner (styled as a push notification — app parody) ---- */
 
 .event-banner {
