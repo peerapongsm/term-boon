@@ -114,9 +114,26 @@ export function click(s: GameState, now = Date.now()): number {
   return gained;
 }
 
+export function takeLoan(s: GameState, now = Date.now()): boolean {
+  if (s.loan) return false;
+  const bps = boonPerSecond(s, now);
+  if (bps <= 0) return false;
+  const principal = bps * TUNING.loanLumpSeconds;
+  s.boon += principal; s.totalBoon += principal; s.allTimeBoon += principal;
+  s.loan = { principal, remaining: principal * (1 + TUNING.loanInterest), interestRate: TUNING.loanInterest };
+  s.credit = Math.max(TUNING.creditMin, s.credit - 80);   // instant credit drop (decays back via creditTick)
+  return true;
+}
+
 export function tick(s: GameState, dtSec: number, now = Date.now()): number {
   const tax = Math.max(activeBuffMults(s, now).taxRate, auditTaxRate(s));
-  return gain(s, boonPerSecond(s, now) * dtSec, tax);
+  const gained = gain(s, boonPerSecond(s, now) * dtSec, tax);
+  if (s.loan) {
+    const pay = Math.min(gained * TUNING.loanSiphon, s.loan.remaining, s.boon);
+    s.boon -= pay; s.loan.remaining -= pay;
+    if (s.loan.remaining <= 0) s.loan = null;
+  }
+  return gained;
 }
 
 export function buyProducer(s: GameState, i: number): boolean {
@@ -214,6 +231,7 @@ function resetRun(s: GameState): void {
   s.boon = 0; s.totalBoon = 0;
   s.producers = PRODUCERS.map(() => 0);
   s.upgrades = []; s.clickTier = 0; s.buffs = [];
+  s.loan = null; s.clickCombo = { count: 0, lastClickMs: 0 };
 }
 
 export function prestige(s: GameState, now = Date.now()): void {

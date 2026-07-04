@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult } from "../src/lib/engine";
+import { newGame, click, tick, buyProducer, buyClickTier, producerCost, boonPerSecond, boonPerClick, buyUpgrade, availableUpgrades, triggerEvent, nextEventDelayMs, canPrestige, baramiGain, prestige, rebirthTier, rebirthTierIndex, canNirvana, nirvana, reenter, creditDriftFromUpgrades, hasAuditImmune, creditBonus, creditTarget, creditTick, auditTaxRate, comboMult, takeLoan } from "../src/lib/engine";
 import { PRODUCERS, TUNING, UPGRADES } from "../src/lib/data";
 
 describe("core engine", () => {
@@ -231,5 +231,26 @@ describe("prestige", () => {
     creditTick(s, 1);
     expect(s.credit).toBeLessThan(900);                          // decays toward low target
     expect(s.credit).toBeGreaterThanOrEqual(300);
+  });
+});
+
+describe("loan", () => {
+  it("takeLoan gives a lump, drops credit, and is repaid via income siphon", () => {
+    const s = newGame(0); s.producers[0] = 1000; s.credit = 700;
+    const bps = boonPerSecond(s, 0);
+    const before = s.boon;
+    expect(takeLoan(s, 0)).toBe(true);
+    expect(s.boon).toBeCloseTo(before + bps * 450, 3);
+    expect(s.credit).toBeLessThan(700);
+    expect(s.loan).not.toBeNull();
+    expect(takeLoan(s, 0)).toBe(false);           // only one active loan
+    for (let t = 0; t < 5000; t++) tick(s, 1, t * 1000);
+    expect(s.loan).toBeNull();                     // fully repaid
+  });
+
+  it("prestige clears an outstanding loan", () => {
+    const s = newGame(0); s.producers[0] = 1000; s.totalBoon = 1e8; takeLoan(s, 0);
+    prestige(s, 0);
+    expect(s.loan).toBeNull();
   });
 });
