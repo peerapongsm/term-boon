@@ -122,9 +122,11 @@ export const UPGRADES: Upgrade[] = [...milestoneUpgrades, ...amulets];
 export const REBIRTH_TIERS: RebirthTier[] = [
   { name: "หมาวัด", baramiFloor: 0 },
   { name: "มนุษย์เดินดิน", baramiFloor: 1 },
-  { name: "เศรษฐีใจบุญ", baramiFloor: 25 },
-  { name: "เทวดา", baramiFloor: 250 },
-  { name: "พรหม", baramiFloor: 2500 },
+  { name: "เศรษฐีใจบุญ", baramiFloor: 20 },
+  { name: "เทพบุตร-เทพธิดา", baramiFloor: 80 },
+  { name: "เทวดา", baramiFloor: 200 },
+  { name: "พรหม", baramiFloor: 1200 },
+  { name: "อรหันต์", baramiFloor: 6000 },
 ];
 
 export const EVENTS: GameEvent[] = [
@@ -154,4 +156,30 @@ export const TUNING = {
   eventMinGapSec: 60,
   eventMaxGapSec: 180,
   eventVisibleSec: 10,
+  // ---- credit ----
+  creditMin: 300,
+  creditMax: 900,
+  creditBaseline: 650,
+  creditBaselinePerTier: 10,
+  creditGateFloor: 500,               // เทวดา gate
+  creditDriftPerSec: 20,
+  creditShareMonetize: 400,           // subtract weight
+  creditShareWholesome: 200,          // add weight
+  clickCreditTrickle: 0.5,            // per click, ×combo
+  auditImmuneCap: 0.05,               // ใบเซอร์บุญแท้ caps tax here
+  // ---- momentum ----
+  momentumPerTier: 0.1,
+  // ---- loan ----
+  loanSiphon: 0.25,
+  loanInterest: 0.15,
+  loanLumpSeconds: 450,               // principal = 450 × bps
+  // ---- click combo ----
+  comboWindowMs: 1500,
+  comboStep: 0.02,
+  comboCap: 2,                        // mult = 1 + min(count·step, cap) → ≤ ×3
+  // ---- ads ----
+  adCooldownSec: 300,
+  adLumpSeconds: 120,                 // lump = max(120×bps, floor)
+  adCreditReward: 20,
+  adBuffSec: 90,
 };
