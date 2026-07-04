@@ -64,6 +64,7 @@ describe("save round-trip", () => {
 describe("offline progress", () => {
   it("caps at 8h and never goes negative (clock rollback)", () => {
     const s = newGame(0);
+    s.credit = 750;
     s.producers[0] = 10; s.lastSeen = 0; // 1 bps
     expect(applyOffline(s, 24 * 3600 * 1000)).toBeCloseTo(8 * 3600); // capped
     const s2 = newGame(1_000_000); s2.producers[0] = 10;
@@ -76,5 +77,11 @@ describe("offline progress", () => {
   it("short absence gives nothing (refresh is not a vacation)", () => {
     const s = newGame(0); s.producers[0] = 10; s.lastSeen = 0;
     expect(applyOffline(s, 30_000)).toBe(0);
+  });
+  it("offline income is reduced by audit tax", () => {
+    const s = newGame(0); s.producers[0] = 100; s.credit = 400; s.lastSeen = 0;
+    const gained = applyOffline(s, 3600 * 1000);   // 1h
+    const gross = 100 * 0.1 * 3600;                // capped well under 8h
+    expect(gained).toBeCloseTo(gross * 0.75, 0);
   });
 });

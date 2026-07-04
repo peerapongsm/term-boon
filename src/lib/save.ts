@@ -1,4 +1,4 @@
-import { GameState, newGame, boonPerSecond } from "./engine";
+import { GameState, newGame, boonPerSecond, auditTaxRate } from "./engine";
 import { PRODUCERS, UPGRADES, ACHIEVEMENTS, TUNING } from "./data";
 
 const KEY = "term-boon-save-v1";
@@ -61,7 +61,7 @@ export function applyOffline(s: GameState, now: number): number {
   s.lastSeen = now;
   if (elapsedSec < 60) return 0;
   const capped = Math.min(elapsedSec, offlineHours(s) * 3600);
-  const gained = boonPerSecond(s, now) * capped;
+  const gained = boonPerSecond(s, now) * capped * (1 - auditTaxRate(s));
   s.boon += gained; s.totalBoon += gained; s.allTimeBoon += gained;
   return gained;
 }
