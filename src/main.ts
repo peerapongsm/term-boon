@@ -1,5 +1,5 @@
 import { load, save, applyOffline } from "./lib/save";
-import { tick, pruneBuffs, nextEventDelayMs, triggerEvent } from "./lib/engine";
+import { tick, pruneBuffs, nextEventDelayMs, triggerEvent, creditTick } from "./lib/engine";
 import { EVENTS, TUNING } from "./lib/data";
 import { formatBoon } from "./lib/units";
 import { renderAll, bindUI, showToast, showEventBanner, unlockAchievement } from "./ui";
@@ -29,9 +29,11 @@ function frame(t: number) {
   last = t;
   if (!state.completed) {
     tick(state, dt, now);
+    creditTick(state, dt, now);
     pruneBuffs(state, now);
     if (now >= nextEventAt) {
-      const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)]!;
+      const pool = EVENTS.filter(e => e.random !== false);
+      const ev = pool[Math.floor(Math.random() * pool.length)]!;
       showEventBanner(ev, () => { triggerEvent(state, ev.id, Date.now()); playSfx("bell"); });
       nextEventAt = now + nextEventDelayMs() + TUNING.eventVisibleSec * 1000;
     }
