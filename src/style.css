@@ -800,3 +800,12 @@ button.upgrade-row:not(.unaffordable):active {
     transition: none !important;
   }
 }
+
+.credit-meter { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.82rem; }
+.credit-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.15); overflow: hidden; }
+.credit-fill { height: 100%; transition: width 0.4s ease; }
+.credit-fill[data-band="good"] { background: #3fa34d; }
+.credit-fill[data-band="mid"] { background: #d9a41a; }
+.credit-fill[data-band="bad"] { background: #c0392b; }
+.credit-gate-hint { margin: 8px 0; padding: 8px 12px; border-radius: 8px;
+  background: #fdecea; color: #a5281b; font-size: 0.85rem; border: 1.5px solid #e6b0aa; }

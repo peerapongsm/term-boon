@@ -23,6 +23,11 @@
       <div class="balance-amount" id="boon-display" tabindex="0">0</div>
       <div class="balance-rate" id="bps-display">+0 บุญ/วิ</div>
       <div class="rebirth-badge" id="rebirth-badge">ภพ: หมาวัด</div>
+      <div class="credit-meter" id="credit-meter" title="เครดิตบุญ">
+        <span class="credit-label">เครดิตบุญ</span>
+        <span class="credit-value" id="credit-value">650</span>
+        <div class="credit-bar"><div class="credit-fill" id="credit-fill"></div></div>
+      </div>
       <button id="mute-btn" class="icon-btn" aria-label="ปิดเสียง">🔔</button>
     </header>
 
@@ -49,6 +54,7 @@
     <section id="panel-profile" class="panel" hidden>
       <div id="achievements-list"></div>
       <div id="stats-block"></div>
+      <p id="credit-gate-hint" class="credit-gate-hint" hidden></p>
       <button id="prestige-btn" class="danger-btn" hidden>สิ้นอายุขัย</button>
       <button id="nirvana-btn" class="nirvana-btn" hidden>นิพพาน</button>
       <p class="about-link"><a href="/about.html" class="link-btn">เกี่ยวกับเกมนี้</a></p>

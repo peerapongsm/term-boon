@@ -1,7 +1,8 @@
 import {
   GameState, click, buyProducer, buyClickTier, buyUpgrade, availableUpgrades,
   boonPerSecond, producerCost, canPrestige, baramiGain, prestige, rebirthTier,
-  canNirvana, nirvana, reenter,
+  canNirvana, nirvana, reenter, creditTarget, auditTaxRate,
+  prestigeBlockedByCredit, rebirthTierIndex,
 } from "./lib/engine";
 import { PRODUCERS, CLICK_TIERS, UPGRADES, REBIRTH_TIERS, ACHIEVEMENTS, EVENTS, TUNING, GameEvent } from "./lib/data";
 import { formatBoon, fullBreakdown, unitFor } from "./lib/units";
@@ -21,6 +22,9 @@ const appRoot = $<HTMLElement>("app");
 const boonDisplay = $<HTMLElement>("boon-display");
 const bpsDisplay = $<HTMLElement>("bps-display");
 const rebirthBadge = $<HTMLElement>("rebirth-badge");
+const creditValue = $<HTMLElement>("credit-value");
+const creditFill = $<HTMLElement>("credit-fill");
+const creditGateHint = $<HTMLElement>("credit-gate-hint");
 const muteBtn = $<HTMLButtonElement>("mute-btn");
 const eventBanner = $<HTMLElement>("event-banner");
 const eventClaim = $<HTMLButtonElement>("event-claim");
@@ -234,6 +238,13 @@ function renderBalance(s: GameState, now: number): void {
   if (balanceCard.dataset.serial !== serial) balanceCard.dataset.serial = serial;
 }
 
+function renderCredit(s: GameState): void {
+  creditValue.textContent = String(Math.round(s.credit));
+  const pct = ((s.credit - 300) / (900 - 300)) * 100;
+  creditFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  creditFill.dataset.band = s.credit >= 750 ? "good" : s.credit >= 500 ? "mid" : "bad";
+}
+
 // ---- render: click tier ----
 
 function renderClickTier(s: GameState): void {
@@ -321,7 +332,20 @@ function renderUpgrades(s: GameState): void {
 // ---- render: prestige / nirvana ----
 
 function renderPrestigeNirvana(s: GameState): void {
-  prestigeBtn.hidden = !canPrestige(s);
+  const canP = canPrestige(s);
+  const blocked = prestigeBlockedByCredit(s);
+  prestigeBtn.hidden = !canP;
+  prestigeBtn.disabled = blocked;
+  prestigeBtn.textContent = canP
+    ? `สิ้นอายุขัย (บารมี +${baramiGain(s)})`
+    : "สิ้นอายุขัย";
+  if (canP && blocked) {
+    creditGateHint.hidden = false;
+    creditGateHint.textContent =
+      `เครดิตต่ำ (${Math.round(s.credit)}) — รัวคลิกศรัทธา / ดูโฆษณาบุญ ดันเครดิต ≥ 500 ก่อนเกิดใหม่ ถึงจะขึ้นเทวดาได้`;
+  } else {
+    creditGateHint.hidden = true;
+  }
   nirvanaBtn.hidden = !canNirvana(s);
 }
 
@@ -418,7 +442,8 @@ function renderStats(s: GameState): void {
   const livesDisplay = String(s.lives - 1);
   const allTimeBoonDisplay = formatBoon(s.allTimeBoon);
   const mediaTaxDisplay = formatBoon(s.stats.mediaTaxPaid);
-  const sig = `${clicksDisplay}|${baramiDisplay}|${livesDisplay}|${allTimeBoonDisplay}|${mediaTaxDisplay}`;
+  const creditDisplay = `${Math.round(s.credit)} (ภาษี ${Math.round(auditTaxRate(s) * 100)}%)`;
+  const sig = `${clicksDisplay}|${baramiDisplay}|${livesDisplay}|${allTimeBoonDisplay}|${mediaTaxDisplay}|${creditDisplay}`;
   if (sig === lastStatsSig) return;
   lastStatsSig = sig;
   statsBlock.innerHTML = `
@@ -427,6 +452,7 @@ function renderStats(s: GameState): void {
     <div class="stat-row"><span>เวียนว่ายมาแล้ว</span><span>${livesDisplay} ครั้ง</span></div>
     <div class="stat-row"><span>บุญสะสมทั้งหมด</span><span>${allTimeBoonDisplay}</span></div>
     <div class="stat-row"><span>ภาษีสื่อที่จ่ายไป</span><span>${mediaTaxDisplay}</span></div>
+    <div class="stat-row"><span>เครดิตบุญ</span><span>${creditDisplay}</span></div>
   `;
 }
 
@@ -446,6 +472,7 @@ function checkUnitMilestone(s: GameState): void {
 
 export function renderAll(s: GameState, now: number): void {
   renderBalance(s, now);
+  renderCredit(s);
   renderBuffPill(s, now);
   renderClickTier(s);
   renderProducers(s);
