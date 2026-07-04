@@ -44,6 +44,14 @@ describe("core engine", () => {
     expect(buyClickTier(s, 5)).toBe(false);
     expect(s.clickTier).toBe(4);
   });
+  it("newGame initializes credit and new fields", () => {
+    const s = newGame(0);
+    expect(s.credit).toBe(650);
+    expect(s.loan).toBeNull();
+    expect(s.clickCombo).toEqual({ count: 0, lastClickMs: 0 });
+    expect(s.lastAdMs).toBe(0);
+    expect(s.samsara).toBe(0);
+  });
 });
 
 describe("upgrades", () => {

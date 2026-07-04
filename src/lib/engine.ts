@@ -10,7 +10,12 @@ export interface GameState {
   buffs: ActiveBuff[];
   achievements: string[];
   stats: { clicks: number; mediaTaxPaid: number };
-  lastSeen: number;              // epoch ms
+  credit: number;                                        // 300–900, per-life
+  loan: { principal: number; remaining: number; interestRate: number } | null;
+  clickCombo: { count: number; lastClickMs: number };
+  lastAdMs: number;                                      // epoch ms of last ad watch
+  samsara: number;                                       // post-นิพพาน reenter count
+  lastSeen: number;
 }
 
 export function newGame(now = Date.now()): GameState {
@@ -18,7 +23,10 @@ export function newGame(now = Date.now()): GameState {
     boon: 0, totalBoon: 0, allTimeBoon: 0,
     producers: PRODUCERS.map(() => 0), upgrades: [], clickTier: 0,
     barami: 0, lives: 1, completed: false, buffs: [],
-    achievements: [], stats: { clicks: 0, mediaTaxPaid: 0 }, lastSeen: now,
+    achievements: [], stats: { clicks: 0, mediaTaxPaid: 0 },
+    credit: 650, loan: null, clickCombo: { count: 0, lastClickMs: 0 },
+    lastAdMs: 0, samsara: 0,
+    lastSeen: now,
   };
 }
 

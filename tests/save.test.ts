@@ -39,6 +39,26 @@ describe("save round-trip", () => {
     const back = deserialize(raw, 0);
     expect(back.upgrades).toEqual(["a-ring"]);
   });
+  it("migrates a v1 save (no credit) to defaults", () => {
+    const v1 = JSON.stringify({ v: 1, state: { boon: 5, barami: 3, lives: 2 } });
+    const s = deserialize(v1, 1000);
+    expect(s.credit).toBe(650);
+    expect(s.loan).toBeNull();
+    expect(s.lastAdMs).toBe(0);
+    expect(s.samsara).toBe(0);
+    expect(s.barami).toBe(3);
+  });
+  it("clamps hostile credit and rejects poisoned loan", () => {
+    const bad = JSON.stringify({ v: 2, state: {
+      credit: 1e999, loan: { principal: -5, remaining: 1e999, interestRate: 0.15 },
+      lastAdMs: 1e999, samsara: -3,
+    } });
+    const s = deserialize(bad, 1000);
+    expect(s.credit).toBe(900);          // clamped to max
+    expect(s.loan).toBeNull();           // non-finite/negative → dropped
+    expect(Number.isFinite(s.lastAdMs)).toBe(true);
+    expect(s.samsara).toBe(0);
+  });
 });
 
 describe("offline progress", () => {

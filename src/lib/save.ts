@@ -7,14 +7,29 @@ const num = (v: unknown, fallback = 0) => {
   return Number.isFinite(n) && n >= 0 ? Math.min(n, 1e300) : fallback;
 };
 
-export const serialize = (s: GameState) => JSON.stringify({ v: 1, state: s });
+export const serialize = (s: GameState) => JSON.stringify({ v: 2, state: s });
+
+const clampNum = (v: unknown, lo: number, hi: number, fallback: number) => {
+  if (v === undefined) return fallback; // field absent (e.g. v1 save) -> default
+  const n = typeof v === "number" && Number.isFinite(v) ? v : NaN;
+  return Number.isNaN(n) ? hi : Math.min(Math.max(n, lo), hi); // present but invalid/overflowed -> clamp to max
+};
+
+function validLoan(v: unknown): GameState["loan"] {
+  if (typeof v !== "object" || v === null) return null;
+  const l = v as Record<string, unknown>;
+  const p = l.principal, r = l.remaining, i = l.interestRate;
+  if (![p, r, i].every(x => typeof x === "number" && Number.isFinite(x) && x >= 0)) return null;
+  return { principal: p as number, remaining: r as number, interestRate: i as number };
+}
 
 export function deserialize(raw: string | null, now = Date.now()): GameState {
   const fresh = newGame(now);
   if (!raw) return fresh;
   let doc: unknown;
   try { doc = JSON.parse(raw); } catch { return fresh; }
-  if (typeof doc !== "object" || doc === null || (doc as { v?: unknown }).v !== 1) return fresh;
+  const v = (doc as { v?: unknown }).v;
+  if (typeof doc !== "object" || doc === null || (v !== 1 && v !== 2)) return fresh;
   const s = (doc as { state?: Partial<GameState> }).state ?? {};
   const upgradeIds = new Set(UPGRADES.map(u => u.id));
   const achIds = new Set(ACHIEVEMENTS.map(a => a.id));
@@ -27,6 +42,11 @@ export function deserialize(raw: string | null, now = Date.now()): GameState {
     completed: s.completed === true, buffs: [], // buffs never persist across load
     achievements: [...new Set((Array.isArray(s.achievements) ? s.achievements : []).filter((x): x is string => typeof x === "string" && achIds.has(x)))],
     stats: { clicks: Math.floor(num(s.stats?.clicks)), mediaTaxPaid: num(s.stats?.mediaTaxPaid) },
+    credit: clampNum(s.credit, 300, 900, 650),
+    loan: validLoan(s.loan),
+    clickCombo: { count: 0, lastClickMs: 0 },   // combo never persists (like buffs)
+    lastAdMs: clampNum(s.lastAdMs, 0, now, 0),
+    samsara: Math.max(0, Math.floor(num(s.samsara))),
     lastSeen: Math.min(num(s.lastSeen, now), now),
   };
 }
